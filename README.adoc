@@ -47,5 +47,27 @@ This guide will be deployed on a 4 nodes minikube cluster.
 * oc v4.8.2
 * AMQ Streams v1.8
 * Grafana v7.5.11
+* projects/namespaces: cluster-source, cluster-target
+* helm v3.6.2
+
+Because this demo used multiple components to setup the entire cluster, we will use the concept of sub-chart whereby we have modules for:
+* cluster-operator -- managing the cluster
+* kafka-cluster -- setting up the kafka cluster components
+* monitoring -- observe and alerts on the kafka cluster
+* subscribers -- they act as producers and consumers
+
+### Part1: Setting up the source kafka cluster
+
+#### Create the Kafka Cluster
+
+. Deploy the cluster operator
+** The cluster-operator CRDs are setup within a subchart named cluster-operator
+[source,text]
+----
+
+----
+
+
+
 
 
