@@ -1,0 +1,51 @@
+# Migrating AMQ Streams from Openshift 3.11 to 4.7
+
+[quote, AMQS Product Docs]
+AMQ Streams simplifies the process of running Apache Kafka in an OpenShift cluster.
+
+In this post I will show how to migrate an AMQ Stream cluster between OCP environments(ie: OCP3.11 to OCP4.8) using MirrorMaker2; a Kafka component used to replicate data between two or more active Kafka clusters, within or across data centers. 
+
+We will begin with an overview of the two clusters(kafka-source and kafka-target), the components deployed, then show how to set up AMQ Stream v1.8, Prometheus(metrics collection), and Grafana(monitoring and alerting). All these components are deployed via a single helm chart with possibility of selectively installing specific resources(amqs, mirrormaker, grafana). 
+
+## Environment Overview
+
+This guide uses two namespaces within the same Openshift cluster to mimic cross OCP deployments migration. The approach would be roughly the same if for instance we were looking to migrate a Strimzi cluster from OCP3 to OCP4. An obvious change would be using external routes when referencing source brokers; rather than services in our case.
+
+### Architecture
+
+image::images/architecture.png[setup-architecture]
+
+### Components, CRDs deployed
+
+We will be deploying AMQ Streams v1.8 for this demo.
+
+* CRDs
+** to grant OCP the capability to read and understand Strimzi resource manifests;
+* Cluster operator to manage the Kafka cluster
+** watches over the strimzi cluster components for change reconciliation
+* Kafka (including ZooKeeper, Entity Operator, Kafka Exporter, and Cruise Control)
+** https://access.redhat.com/documentation/en-us/red_hat_amq/2021.q3/html-single/using_amq_streams_on_openshift/index#type-KafkaSpec-reference[Follow this link for more]
+* KafkaMirrorMaker2
+** handles cluster mirroring activities;
+** deployed on the target cluster
+* Prometheus
+** used for metrics collection
+* Grafana -- v7.5.11
+** used for displaying metrics on dashboards and alerting
+** deployed in both clusters;
+** we could use PrometheusRule and Alertmanager to send alerts as well.
+
+## Implementation
+
+This guide will be deployed on a 4 nodes minikube cluster.
+
+### Cluster info, Tools used
+
+* 2 nodes OpenShift 4.8 Cluster
+** The ideal setup should be at least 3 worker nodes.
+* kubernetes v1.21.0
+* oc v4.8.2
+* AMQ Streams v1.8
+* Grafana v7.5.11
+
+
