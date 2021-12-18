@@ -336,10 +336,12 @@ data:
     api_url = {{ .Values.grafana.apiUrl }}
     ;team_ids =
     ;allowed_organizations =
-    tls_skip_verify_insecure = false
+    #tls_skip_verify_insecure = false
+    tls_skip_verify_insecure = true
     ;tls_client_cert =
     ;tls_client_key =
-    tls_client_ca = /etc/grafana/ca.crt
+    tls_client_ca = 
+    #tls_client_ca = /etc/grafana/ca.crt
 
     ; Set to true to enable sending client_id and client_secret via POST body instead of Basic authentication HTTP header
     ; This might be required if the OAuth provider is not RFC6749 compliant, only supporting credentials passed via POST payload
