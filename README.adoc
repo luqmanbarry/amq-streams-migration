@@ -3,6 +3,7 @@
 [quote, AMQS Product Docs]
 AMQ Streams simplifies the process of running Apache Kafka in an OpenShift cluster.
 
+
 In this post I will show how to migrate an AMQ Stream cluster between OCP environments(ie: OCP3.11 to OCP4.8) using MirrorMaker2; a Kafka component used to replicate data between two or more active Kafka clusters, within or across data centers. 
 
 We will begin with an overview of the two clusters(kafka-source and kafka-target), the components deployed, then show how to set up AMQ Stream v1.8, Prometheus(metrics collection), and Grafana(monitoring and alerting). All these components are deployed via a single helm chart with possibility of selectively installing specific resources(amqs, mirrormaker, grafana). 
