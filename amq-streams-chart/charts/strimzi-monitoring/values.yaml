@@ -1,0 +1,25 @@
+grafana:
+  adminPassword: admin
+  host: strimzi-grafana.apps.cluster-ceda.ceda.sandbox1278.opentlc.com
+  clientId: my-oauth-clientId
+  clientSecret: my-oauth-clientSecret
+  scopes: "openid profile email"
+  authUrl: https://idp.company.com/oauth2/v1/authorize
+  tokenUrl: https://idp.company.com/oauth2/v1/token
+  apiUrl: https://idp.company.com/oauth2/v1/.well-known/endpoints
+  storageProvisioner: aws-ebs
+  storage: 2Gi
+  storageClassName: gp2
+  replicas: 1
+  uiTheme: light
+  datasource:
+    # Update me, I should be your prometheus server route host
+    url: thanos-querier-openshift-monitoring.apps.cluster-ceda.ceda.sandbox1278.opentlc.com
+  notifiers:
+    slack:
+      username: username-here
+      url: https://hooks.slack.com/services/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
+      token: VERYs3c4reToken
+      recipient: team-channel
+    teams:
+      url: https://your-teams-webhook

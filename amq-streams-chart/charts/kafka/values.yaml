@@ -1,0 +1,137 @@
+
+kafka:
+  replicas: 2
+  version: 2.8.0
+  config:
+    auto.create.topics.enable: "true"
+    default.replication.factor: 2
+    log.retention.bytes: 209715200
+    log.retention.hours: 24
+    log.segment.bytes: 104857600
+    min.insync.replicas: 1
+    num.partitions: 5
+    num.recovery.threads.per.data.dir: 8
+    offsets.topic.replication.factor: 2
+    transaction.state.log.min.isr: 1
+    transaction.state.log.replication.factor: 2
+    zookeeper.connection.timeout.ms: 18000
+    zookeeper.session.timeout.ms: 18000
+    compression.type: gzip
+    log.message.format.version: "2.8"
+    inter.broker.protocol.version: "2.8"
+  livenessProbe:
+    failureThreshold: 60
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 10
+  readinessProbe:
+    failureThreshold: 60
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 10
+  terminationGracePeriodSeconds: 180
+  template:
+    podDisruptionBudget:
+      minAvailable: 1
+    pod:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: strimzi.io/name
+                    operator: In
+                    values:
+                      - cluster-source-kafka
+              topologyKey: "kubernetes.io/hostname"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  jvmOptions:
+    -Xms: 256M
+    -Xmx: 256M 
+  storage:
+    class: gp2
+    provisionerLabel: kubernetes.io/aws-ebs
+    size: 3Gi
+
+zookeeper:
+  replicas: 2
+  resources:
+    limits:
+      cpu: 250m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 1Gi
+  template:
+    podDisruptionBudget:
+      minAvailable: 1
+  storage:
+    class: gp2
+    provisionerLabel: kubernetes.io/aws-ebs
+    size: 1Gi
+  jvmOptions:
+    -Xms: 256M
+    -Xmx: 256M
+
+topicOperator:
+  resources:
+    limits:
+      cpu: 300m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+userOperator:
+  resources:
+    limits:
+      cpu: 300m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+kafkaExporter:
+  resources:
+    limits:
+      cpu: 300m
+      memory: 300Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  livenessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 10
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 10
+
+cruiseControl:
+  deployRebalance: true
+  resources:
+    limits:
+      cpu: 300m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  livenessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 10
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 10

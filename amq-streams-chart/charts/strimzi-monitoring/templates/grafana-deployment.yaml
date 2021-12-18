@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: {{ include "strimzi-monitoring.namespace" . }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}
+    app: strimzi
+    {{- include "strimzi-monitoring.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.grafana.replicas }}
+  selector:
+    matchLabels:
+      name: grafana
+  template:
+    metadata:
+      annotations:
+        checksum/grafana-config: {{ include (print $.Template.BasePath "/grafana-config.yaml") . | sha256sum }}
+        checksum/grafana-datasource: {{ include (print $.Template.BasePath "/grafana-datasource.yaml") . | sha256sum }}
+        checksum/grafana-dashboards: {{ include (print $.Template.BasePath "/grafana-dashboards.yaml") . | sha256sum }}
+      labels:
+        name: grafana
+    spec:
+      serviceAccountName: grafana-serviceaccount
+      containers:
+      - env:
+        - name: SERVICE_ACCOUNT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: grafana-serviceaccount-token
+              key: token
+        - name: GRAFANA_NOTIFIERS_SLACK_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: grafana-configs-secret
+              key: GRAFANA_NOTIFIERS_SLACK_TOKEN
+        - name: GRAFANA_NOTIFIERS_SLACK_URL
+          valueFrom:
+            secretKeyRef:
+              name: grafana-configs-secret
+              key: GRAFANA_NOTIFIERS_SLACK_URL
+        - name: GRAFANA_NOTIFIERS_TEAMS_URL
+          valueFrom:
+            secretKeyRef:
+              name: grafana-configs-secret
+              key: GRAFANA_NOTIFIERS_TEAMS_URL
+        - name: GRAFANA_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: grafana-configs-secret
+              key: GRAFANA_ADMIN_PASSWORD
+        name: grafana
+        image: grafana/grafana:7.5.11
+        ports:
+        - name: grafana
+          containerPort: 3000
+          protocol: TCP
+        volumeMounts:
+        - name: grafana-data
+          mountPath: /var/lib/grafana
+        - name: grafana-logs
+          mountPath: /var/log/grafana
+        - name: grafana-ini
+          mountPath: /etc/grafana/grafana.ini
+          readOnly: true
+          subPath: grafana.ini
+        - name: grafana-datasource
+          mountPath: /etc/grafana/provisioning/datasources/datasource.yaml
+          readOnly: true
+          subPath: datasource.yaml
+        - name: grafana-oauth-ca
+          mountPath: /etc/grafana/ca.crt
+          readOnly: true
+          subPath: ca.crt
+        - name: grafana-dashboards
+          mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
+          readOnly: true
+          subPath: dashboards.yaml
+        - name: strimzi-kafka-exporter-dashboard
+          mountPath: /etc/grafana/provisioning/dashboards/strimzi-kafka-exporter.json
+          readOnly: true
+          subPath: strimzi-kafka-exporter.json
+        - name: strimzi-zookeeper-dashboard
+          mountPath: /etc/grafana/provisioning/dashboards/strimzi-zookeeper.json
+          readOnly: true
+          subPath: strimzi-zookeeper.json
+        - name: strimzi-operators-dashboard
+          mountPath: /etc/grafana/provisioning/dashboards/strimzi-operators.json
+          readOnly: true
+          subPath: strimzi-operators.json
+        - name: strimzi-kafka-dashboard
+          mountPath: /etc/grafana/provisioning/dashboards/strimzi-kafka.json
+          readOnly: true
+          subPath: strimzi-kafka.json
+        - name: strimzi-kafka-bridge-dashboard
+          mountPath: /etc/grafana/provisioning/dashboards/strimzi-kafka-bridge.json
+          readOnly: true
+          subPath: strimzi-kafka-bridge.json
+        - name: strimzi-cruise-control-dashboard
+          mountPath: /etc/grafana/provisioning/dashboards/strimzi-cruise-control.json
+          readOnly: true
+          subPath: strimzi-cruise-control.json
+        - name: strimzi-kafka-mirror-maker-2-dashboard
+          mountPath: /etc/grafana/provisioning/dashboards/strimzi-kafka-mirror-maker-2.json
+          readOnly: true
+          subPath: strimzi-kafka-mirror-maker-2.json
+        - name: strimzi-kafka-connect-dashboard
+          mountPath: /etc/grafana/provisioning/dashboards/strimzi-kafka-connect.json
+          readOnly: true
+          subPath: strimzi-kafka-connect.json
+        - name: alerts
+          mountPath: /etc/grafana/provisioning/dashboards/alerts.json
+          readOnly: false
+          subPath: alerts.json
+        - name: grafana-notifiers-config
+          mountPath: /etc/grafana/provisioning/notifiers/notifiers.yaml
+          readOnly: true
+          subPath: notifiers.yaml
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      volumes:
+      - name: grafana-data
+        persistentVolumeClaim:
+          claimName: grafana-data
+      - name: grafana-logs
+        emptyDir: {}
+      - name: grafana-datasource
+        configMap:
+          name: grafana-datasource
+      - name: grafana-ini
+        configMap:
+          name: grafana-config
+      - name: grafana-oauth-ca
+        configMap:
+          name: grafana-config
+      - name: grafana-dashboards
+        configMap:
+          name: grafana-dashboards
+      - name: strimzi-kafka-exporter-dashboard
+        configMap:
+          name: strimzi-kafka-exporter-dashboard
+      - name: strimzi-zookeeper-dashboard
+        configMap:
+          name: strimzi-zookeeper-dashboard
+      - name: strimzi-operators-dashboard
+        configMap:
+          name: strimzi-operators-dashboard
+      - name: strimzi-kafka-dashboard
+        configMap:
+          name: strimzi-kafka-dashboard
+      - name: strimzi-kafka-bridge-dashboard
+        configMap:
+          name: strimzi-kafka-bridge-dashboard
+      - name: strimzi-cruise-control-dashboard
+        configMap:
+          name: strimzi-cruise-control-dashboard
+      - name: strimzi-kafka-mirror-maker-2-dashboard
+        configMap:
+          name: strimzi-kafka-mirror-maker-2-dashboard
+      - name: strimzi-kafka-connect-dashboard
+        configMap:
+          name: strimzi-kafka-connect-dashboard
+      - name: alerts
+        configMap:
+          name: grafana-alerts
+      - name: grafana-notifiers-config
+        secret:
+          secretName: grafana-notifiers-config
+---

@@ -1,0 +1,10 @@
+Installs the kafka cluster including the following:
+    Kafka
+    Zookeeper
+    KafkaExporter
+    UserEntityOperator
+    TopicOperator
+    UserOperator
+    CruiseControl
+    KafkaRebalance
+    JmxMetrics

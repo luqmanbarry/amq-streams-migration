@@ -1,0 +1,151 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: {{ include "kafka.name" . }}
+  namespace: {{ include "kafka.namespace" . }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}
+    app: strimzi
+    name: {{ .Values.global.kafka.clusterName }}
+    {{- include "kafka.labels" . | nindent 4 }}
+spec:
+  kafka:
+    version: {{ .Values.kafka.version }}
+{{- if .Values.kafka.config }}
+    config:
+      {{- toYaml .Values.kafka.config | nindent 6 }}
+{{- end }}
+    listeners:
+      - name: internal
+        port: 9092
+        type: internal
+        tls: false
+      - name: external
+        port: 9093
+        type: route
+        tls: true
+    livenessProbe:
+      {{- toYaml .Values.kafka.livenessProbe | nindent 6 }}
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: kafka-metrics
+          key: kafka-metrics-config.yml
+    readinessProbe:
+      {{- toYaml .Values.kafka.readinessProbe | nindent 6 }}
+    replicas: {{ .Values.kafka.replicas }}
+    resources:
+      {{- toYaml .Values.kafka.resources | nindent 6 }}
+    jvmOptions:
+      {{- toYaml .Values.kafka.jvmOptions | nindent 6 }}
+    storage:
+      deleteClaim: false
+      size: {{ .Values.kafka.storage.size }}
+      type: persistent-claim
+    template:
+      podDisruptionBudget:
+        minAvailable: {{ .Values.kafka.template.podDisruptionBudget.minAvailable }}
+      pod:
+        terminationGracePeriodSeconds: {{ .Values.kafka.terminationGracePeriodSeconds }}
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: strimzi.io/name
+                      operator: In
+                      values:
+                        - {{ include "kafka.name" . }}-kafka
+                topologyKey: "kubernetes.io/hostname"
+        tolerations:
+        - key: "elasticsearch"
+          operator: "Equal"
+          value: "reserved"
+          effect: "NoExecute"
+      persistentVolumeClaim:
+        metadata:
+          annotations:
+            volume.beta.kubernetes.io/storage-provisioner: {{ .Values.kafka.storage.provisionerLabel }}
+  zookeeper:
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: kafka-metrics
+          key: zookeeper-metrics-config.yml
+    replicas: {{ .Values.zookeeper.replicas }}
+    resources:
+      {{- toYaml .Values.zookeeper.resources | nindent 6 }}
+    jvmOptions:
+      {{- toYaml .Values.zookeeper.jvmOptions | nindent 6 }}
+    storage:
+      class: {{ .Values.zookeeper.storage.class }}
+      deleteClaim: false
+      size: {{ .Values.zookeeper.storage.size }}
+      type: persistent-claim
+    template:
+      podDisruptionBudget:
+        minAvailable: {{ .Values.kafka.template.podDisruptionBudget.minAvailable }}
+      pod:
+        terminationGracePeriodSeconds: {{ .Values.kafka.terminationGracePeriodSeconds }}
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: strimzi.io/name
+                      operator: In
+                      values:
+                        - {{ include "kafka.name" . }}-zookeeper
+                topologyKey: "kubernetes.io/hostname"
+        tolerations:
+        - key: "elasticsearch"
+          operator: "Equal"
+          value: "reserved"
+          effect: "NoExecute"
+      persistentVolumeClaim:
+        metadata:
+          annotations:
+            volume.beta.kubernetes.io/storage-provisioner: {{ .Values.zookeeper.storage.provisionerLabel }}
+  entityOperator:
+    topicOperator:
+      resources:
+        {{- toYaml .Values.topicOperator.resources | nindent 8 }}
+    userOperator:
+      resources:
+        {{- toYaml .Values.userOperator.resources | nindent 8 }}
+  kafkaExporter:
+    topicRegex: ".*"
+    groupRegex: ".*"
+    resources: 
+      {{- toYaml .Values.kafkaExporter.resources | nindent 6 }}
+    enableSaramaLogging: {{ .Values.kafkaExporter.enableSaramaLogging }}
+    logging: {{ .Values.kafkaExporter.logging }}
+    readinessProbe: 
+      {{- toYaml .Values.kafkaExporter.readinessProbe | nindent 6 }}
+    livenessProbe: 
+      {{- toYaml .Values.kafkaExporter.livenessProbe | nindent 6 }}
+  {{- if .Values.cruiseControl }}
+  cruiseControl:
+    {{- if .Values.cruiseControl.brokerCapacity }}
+    brokerCapacity:
+      {{- toYaml .Values.cruiseControl.brokerCapacity | nindent 6 }}
+    {{- end }}
+    resources: 
+      {{- toYaml .Values.cruiseControl.resources | nindent 6 }}
+    readinessProbe: 
+      {{- toYaml .Values.cruiseControl.readinessProbe | nindent 6 }}
+    livenessProbe: 
+      {{- toYaml .Values.cruiseControl.livenessProbe | nindent 6 }}
+    config:
+      webserver.http.cors.enabled: true
+      webserver.http.cors.origin: "*"
+      webserver.http.cors.exposeheaders: "User-Task-ID,Content-Type"
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: kafka-metrics
+          key: cruise-control-metrics-config.yml
+  {{- end }}

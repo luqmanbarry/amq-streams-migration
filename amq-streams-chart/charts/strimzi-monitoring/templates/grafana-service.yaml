@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: {{ include "strimzi-monitoring.namespace" . }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}
+    app: strimzi
+    {{- include "strimzi-monitoring.labels" . | nindent 4 }}
+spec:
+  ports:
+  - name: grafana
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    name: grafana
+  sessionAffinity: None
+  type: ClusterIP

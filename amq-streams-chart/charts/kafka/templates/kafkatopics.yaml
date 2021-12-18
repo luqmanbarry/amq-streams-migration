@@ -1,0 +1,49 @@
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: topic.high
+  labels:
+    strimzi.io/cluster: {{ include "kafka.name" . }}
+    app: strimzi
+    {{- include "kafka.labels" . | nindent 4 }}
+spec:
+  partitions: 5
+  replicas: 2
+  config:
+    min.insync.replicas: '1'
+    segment.bytes: '104857600'
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: topic.low
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}
+    strimzi.io/cluster: {{ include "kafka.name" . }}
+    app: strimzi
+    {{- include "kafka.labels" . | nindent 4 }}
+spec:
+  partitions: 5
+  replicas: 2
+  config:
+    min.insync.replicas: '1'
+    segment.bytes: '104857600'
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: topic.addhoc
+  labels:
+    strimzi.io/cluster: {{ include "kafka.name" . }}
+    app: strimzi
+    {{- include "kafka.labels" . | nindent 4 }}
+spec:
+  partitions: 1
+  replicas: 2
+  config:
+    min.insync.replicas: '1'
+    segment.bytes: '104857600'
+---  
+
+  

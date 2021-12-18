@@ -1,0 +1,3 @@
+Setup the cluster-operator for managing the kafka cluster.
+
+Must be installed before the kafka components.

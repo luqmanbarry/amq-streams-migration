@@ -1,0 +1,19 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: grafana
+  namespace: {{ include "strimzi-monitoring.namespace" . }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}
+    app: strimzi
+    {{- include "strimzi-monitoring.labels" . | nindent 4 }}
+spec:
+  host: "{{ .Values.grafana.host }}"
+  port:
+    targetPort: grafana
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: grafana
+    weight: 100

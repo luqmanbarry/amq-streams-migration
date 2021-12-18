@@ -37,7 +37,9 @@ We will be deploying AMQ Streams v1.8 for this demo.
 
 ## Implementation
 
-This guide will be deployed on a 4 nodes minikube cluster.
+This guide will be deployed on a 2 nodes Openshift 4.8 cluster.
+
+IMPORTANT: You need _cluster-admin_ role on the cluster to execute most the tasks described in this guide.
 
 ### Cluster info, Tools used
 
@@ -50,22 +52,103 @@ This guide will be deployed on a 4 nodes minikube cluster.
 * projects/namespaces: cluster-source, cluster-target
 * helm v3.6.2
 
-Because this demo used multiple components to setup the entire cluster, we will use the concept of sub-chart whereby we have modules for:
+Because this demo uses multiple components to setup the entire cluster, we will use the concept of sub-chart whereby we have modules for:
 * cluster-operator -- managing the cluster
-* kafka-cluster -- setting up the kafka cluster components
-* monitoring -- observe and alerts on the kafka cluster
+* kafka -- setting up the kafka cluster components
+* strimzi-monitoring -- observe and alerts on the kafka cluster
 * subscribers -- they act as producers and consumers
 
 ### Part1: Setting up the source kafka cluster
 
-#### Create the Kafka Cluster
+#### Enable user workload monitoring
 
-. Deploy the cluster operator
-** The cluster-operator CRDs are setup within a subchart named cluster-operator
+* Check if user-workload monitoring is enabled
+
+[source,bash]
+----
+oc -n openshift-user-workload-monitoring get pod
+----
+
+** If enabled, the output should look like below table
+
 [source,text]
 ----
-
+NAME                                   READY   STATUS        RESTARTS   AGE
+prometheus-operator-6f7b748d5b-t7nbg   2/2     Running       0          3h
+prometheus-user-workload-0             4/4     Running       1          3h
+prometheus-user-workload-1             4/4     Running       1          3h
+thanos-ruler-user-workload-0           3/3     Running       0          3h
+thanos-ruler-user-workload-1           3/3     Running       0          3h
 ----
+
+* If output don't match the table above, apply the user-workload-monitoring sub-chart
++
+[source,bash]
+----
+# Install the cluster-operator sub-chart
+helm install user-workload-monitoring amq-streams-chart/charts/user-workload-monitoring --namespace cluster-source
+# list pods
+oc -n openshift-user-workload-monitoring get pod
+----
++
+** Output should look like above table.
+* https://docs.openshift.com/container-platform/4.8/monitoring/enabling-monitoring-for-user-defined-projects.html[Click here for more].
+
+#### Deploy the cluster operator
+** The cluster-operator CRDs are setup within a subchart named cluster-operator
+** workdir: parent directory of the root helm chart
+** you could add --dry-run to preview actions taken by helm
+[source,bash]
+----
+# Install the cluster-operator sub-chart
+helm install cluster-operator amq-streams-chart/charts/cluster-operator --namespace cluster-source
+# list pods
+oc -n cluster-source get pods -l 'helm.sh/chart=cluster-operator'
+----
+* The output should look like below table
+[source,text]
+----
+Put output  here
+----
+
+#### Deploy Kafka
+** The cluster-operator must be deployed first
+** The kafka components are declared within a sub-chart named kafka-components.
+
+[source,bash]
+----
+# Apply the kafka sub-chart to deploy kafka and its components
+helm install strimzi-cluster amq-streams-chart/charts/kafka --namespace cluster-source
+# list pods
+oc -n cluster-source get pods -l 'helm.sh/chart=kafka'
+----
+* The output should look like below table
+[source,text]
+----
+Put output  here
+----
+
+#### Deploy monitoring resources for dashboards and alerts
+
+*Prerequisites:*
+
+* User workload monitoring must be enabled before attempting to deploy the monitoring resources for the strimzi cluster. 
+* I have added the workload monitoring enabler configmap in the kafka subchart. 
+
+[source,bash]
+----
+# Apply the strimzi-monitoring sub-chart
+helm install strimzi-monitoring amq-streams-chart/charts/strimzi-monitoring --namespace cluster-source
+# list pods
+oc -n cluster-source get pods -l 'helm.sh/chart=strimzi-monitoring'
+----
+* The output should look like below table
+[source,text]
+----
+Put output  here
+----
+
+
 
 
 

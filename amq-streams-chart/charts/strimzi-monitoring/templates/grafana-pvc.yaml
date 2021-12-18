@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-data
+  namespace: {{ include "strimzi-monitoring.namespace" . }}
+  annotations:
+    volume.beta.kubernetes.io/storage-provisioner: {{ .Values.grafana.storageProvisioner }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}
+    app: strimzi
+    {{- include "strimzi-monitoring.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.grafana.storage }}
+  storageClassName: {{ .Values.grafana.storageClassName }}

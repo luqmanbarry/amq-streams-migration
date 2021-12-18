@@ -1,0 +1,5 @@
+This chart install grafana and all the necessary components for monitoring and alerting.
+
+You need to update the grafana.datasource.url to point to your prometheus server.
+
+Make sure your provide correct values of grafana configs in the values.yaml file.

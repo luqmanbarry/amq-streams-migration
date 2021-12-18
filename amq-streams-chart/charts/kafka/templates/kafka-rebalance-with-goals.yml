@@ -1,0 +1,21 @@
+{{- if .Values.cruiseControl.deployRebalance }}
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaRebalance
+metadata:
+  name: kafka-rebalance
+  namespace: {{ include "kafka.namespace" . }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}
+    app: strimzi
+    strimzi.io/cluster: {{ include "kafka.name" $ }}
+    {{- include "kafka.labels" $ | nindent 4 }}
+spec:
+  goals:
+    - CpuCapacityGoal
+    - NetworkInboundCapacityGoal
+    - DiskCapacityGoal
+    - RackAwareGoal
+    - MinTopicLeadersPerBrokerGoal
+    - NetworkOutboundCapacityGoal
+    - ReplicaCapacityGoal
+{{- end }}
