@@ -50,7 +50,7 @@ IMPORTANT: You need _cluster-admin_ role on the cluster to execute most the task
 * oc v4.8.2
 * AMQ Streams v1.8
 * Grafana v7.5.11
-* projects/namespaces: cluster-source, cluster-target
+* projects/namespaces: source-cluster, cluster-target
 * helm v3.6.2
 
 Because this demo uses multiple components to setup the entire cluster, we will use the concept of sub-chart whereby we have modules for:
@@ -97,7 +97,7 @@ thanos-ruler-user-workload-0         3/3     Running   0          55s
 ----
 # Install the cluster-operator sub-chart
 oc project source-cluster # not required
-helm install user-workload-monitoring amq-streams-chart/charts/user-workload-monitoring --namespace source-cluster
+helm upgrade --install user-workload-monitoring amq-streams-chart/charts/user-workload-monitoring --namespace source-cluster
 # list pods
 oc -n openshift-user-workload-monitoring get pod
 ----
@@ -113,9 +113,9 @@ oc -n openshift-user-workload-monitoring get pod
 ----
 # Install the cluster-operator sub-chart
 oc project source-cluster
-helm install cluster-operator amq-streams-chart/charts/cluster-operator --namespace source-cluster
+helm upgrade --install cluster-operator amq-streams-chart/charts/cluster-operator --namespace source-cluster
 # list pods
-oc -n cluster-source get pods
+oc -n source-cluster get pods
 ----
 * The output should look like below table
 [source,text]
@@ -124,7 +124,7 @@ NAME                                        READY   STATUS    RESTARTS   AGE
 strimzi-cluster-operator-7447d98d84-xcqdk   1/1     Running   0          2m1s
 ----
 
-#### Deploy Kafka
+#### Deploy Kafka its components
 ** The cluster-operator must be deployed first
 ** The kafka components are declared within a sub-chart named kafka-components.
 
@@ -132,14 +132,25 @@ strimzi-cluster-operator-7447d98d84-xcqdk   1/1     Running   0          2m1s
 ----
 # Apply the kafka sub-chart to deploy kafka and its components
 oc project source-cluster
-helm install strimzi-cluster amq-streams-chart/charts/kafka --namespace source-cluster
+helm upgrade --install strimzi-cluster amq-streams-chart/charts/kafka --namespace source-cluster
 # list pods
-oc -n cluster-source get pods -l 'helm.sh/chart=kafka'
+oc -n source-cluster get pods
 ----
-* The output should look like below table
+* After about 5min, the output should look like below table
+** If you don't see below output, troubleshoot by:
+*** making sure you have enough resources(cpu, memory) on the nodes
+*** `oc describe` the the sts, deployment, pods; you might find some indicators.
 [source,text]
 ----
-Put output  here
+NAME                                               READY   STATUS    RESTARTS   AGE
+strimzi-cluster-cruise-control-84c5985b85-q2wxm    2/2     Running   0          82s
+strimzi-cluster-entity-operator-8647fb6fbb-4ls9b   3/3     Running   0          17m
+strimzi-cluster-kafka-0                            1/1     Running   0          19m
+strimzi-cluster-kafka-1                            1/1     Running   0          19m
+strimzi-cluster-kafka-exporter-dccf6c7-hcx9s       0/1     Running   0          30s
+strimzi-cluster-operator-74574b6484-rcxdm          1/1     Running   0          100s
+strimzi-cluster-zookeeper-0                        1/1     Running   0          21m
+strimzi-cluster-zookeeper-1                        1/1     Running   0          20m
 ----
 
 #### Deploy monitoring resources for dashboards and alerts
@@ -152,9 +163,9 @@ Put output  here
 [source,bash]
 ----
 # Apply the strimzi-monitoring sub-chart
-helm install strimzi-monitoring amq-streams-chart/charts/strimzi-monitoring --namespace cluster-source
+helm upgrade --install strimzi-monitoring amq-streams-chart/charts/strimzi-monitoring --namespace source-cluster
 # list pods
-oc -n cluster-source get pods -l 'helm.sh/chart=strimzi-monitoring'
+oc -n source-cluster get pods -l 'helm.sh/chart=strimzi-monitoring'
 ----
 * The output should look like below table
 [source,text]

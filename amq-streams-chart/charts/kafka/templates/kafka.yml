@@ -61,6 +61,10 @@ spec:
           operator: "Equal"
           value: "reserved"
           effect: "NoExecute"
+        - key: "elasticsearch"
+          operator: "Equal"
+          value: "reserved"
+          effect: "NoSchedule"
       persistentVolumeClaim:
         metadata:
           annotations:
@@ -100,6 +104,10 @@ spec:
           operator: "Equal"
           value: "reserved"
           effect: "NoExecute"
+        - key: "elasticsearch"
+          operator: "Equal"
+          value: "reserved"
+          effect: "NoSchedule"
       persistentVolumeClaim:
         metadata:
           annotations:
