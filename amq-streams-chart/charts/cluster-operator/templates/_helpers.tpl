@@ -34,7 +34,7 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "cluster-operator.labels" -}}
-helm.sh/chart: {{ include "cluster-operator.chart" . }}
+helm.sh/chart: {{ .Chart.Name }}
 {{ include "cluster-operator.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}

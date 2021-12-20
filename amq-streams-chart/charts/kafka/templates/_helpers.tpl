@@ -35,6 +35,7 @@ Common labels
 */}}
 {{- define "kafka.labels" -}}
 helm.sh/chart: {{ include "kafka.chart" . }}
+strimzi.io/cluster: {{ .Values.kafka.name }}
 {{ include "kafka.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
