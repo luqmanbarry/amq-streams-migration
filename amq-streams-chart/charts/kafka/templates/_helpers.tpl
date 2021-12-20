@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "kafka.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- default .Values.global.kafka.clusterName .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*

@@ -4,7 +4,7 @@ kind: KafkaTopic
 metadata:
   name: topic.high
   labels:
-    strimzi.io/cluster: {{ include "kafka.name" . }}
+    strimzi.io/cluster: {{ .Values.global.kafka.clusterName }} . }}
     app: strimzi
     {{- include "kafka.labels" . | nindent 4 }}
 spec:
@@ -20,11 +20,11 @@ metadata:
   name: topic.low
   labels:
     helm.sh/chart: {{ .Chart.Name }}
-    strimzi.io/cluster: {{ include "kafka.name" . }}
+    strimzi.io/cluster: {{ .Values.global.kafka.clusterName }} . }}
     app: strimzi
     {{- include "kafka.labels" . | nindent 4 }}
 spec:
-  partitions: 5
+  partitions: 3
   replicas: 2
   config:
     min.insync.replicas: '1'
@@ -33,17 +33,12 @@ spec:
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
 metadata:
-  name: topic.addhoc
+  name: topic.defaults
   labels:
-    strimzi.io/cluster: {{ include "kafka.name" . }}
+    strimzi.io/cluster: {{ .Values.global.kafka.clusterName }} . }}
     app: strimzi
     {{- include "kafka.labels" . | nindent 4 }}
-spec:
-  partitions: 1
-  replicas: 2
-  config:
-    min.insync.replicas: '1'
-    segment.bytes: '104857600'
+spec: {}
 ---  
 
   

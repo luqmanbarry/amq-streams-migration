@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: consumer-high
+  name: consumer-high
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: consumer-high
+  template:
+    metadata:
+      labels:
+        app: consumer-high
+    spec:
+      containers:
+      - name: consumer-high
+        image: strimzi/hello-world-consumer:latest
+        resources:
+          limits:
+            cpu: "200m"
+            memory: 256Mi
+          requests:
+            cpu: "200m"
+            memory: 256Mi
+        env:
+          - name: BOOTSTRAP_SERVERS
+            value: {{ .Values.global.kafka.clusterName }}-kafka-bootstrap.{{ .Values.global.kafka.namespace }}.cluster.local:9092
+          - name: TOPIC
+            value: "topic.high"
+          - name: LOG_LEVEL
+            value: "INFO"
+          - name: MESSAGE_COUNT
+            value: "10000"
+          # Set to make data push faster
+          - name: GROUP_ID
+            value: "consumer-high"

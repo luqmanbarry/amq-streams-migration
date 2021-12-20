@@ -7,7 +7,7 @@ metadata:
   labels:
     helm.sh/chart: {{ .Chart.Name }}
     app: strimzi
-    strimzi.io/cluster: {{ include "kafka.name" $ }}
+    strimzi.io/cluster: {{ .Values.global.kafka.clusterName }} . }}
     {{- include "kafka.labels" $ | nindent 4 }}
 spec:
   goals:

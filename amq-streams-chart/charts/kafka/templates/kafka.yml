@@ -1,7 +1,7 @@
 apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
-  name: {{ include "kafka.name" . }}
+  name: {{ .Values.global.kafka.clusterName }}
   namespace: {{ include "kafka.namespace" . }}
   labels:
     helm.sh/chart: {{ .Chart.Name }}
