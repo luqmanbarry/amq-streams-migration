@@ -45,8 +45,6 @@ spec:
       type: persistent-claim
     template:
       pod:
-        podDisruptionBudget:
-          minAvailable: {{ .Values.kafka.template.podDisruptionBudget.minAvailable }}
         terminationGracePeriodSeconds: {{ .Values.kafka.terminationGracePeriodSeconds }}
         affinity:
           podAntiAffinity:
@@ -86,8 +84,6 @@ spec:
       type: persistent-claim
     template:
       pod:
-        podDisruptionBudget:
-          minAvailable: {{ .Values.kafka.template.podDisruptionBudget.minAvailable }}
         terminationGracePeriodSeconds: {{ .Values.kafka.terminationGracePeriodSeconds }}
         affinity:
           podAntiAffinity:
