@@ -42,7 +42,7 @@ This guide will be deployed on a 2 nodes Openshift 4.8 cluster.
 
 IMPORTANT: You need _cluster-admin_ role on the cluster to execute most the tasks described in this guide.
 
-### Cluster info, Tools used
+### Cluster info, tools used
 
 * 2 nodes OpenShift 4.8 Cluster
 ** The ideal setup should be at least 3 worker nodes.
@@ -57,7 +57,8 @@ Because this demo uses multiple components to setup the entire cluster, we will 
 * cluster-operator -- managing the cluster
 * kafka -- setting up the kafka cluster components
 * strimzi-monitoring -- observe and alerts on the kafka cluster
-* subscribers -- they act as producers and consumers
+* sample-apps -- they act as producers and consumers
+* During the entirety of this guide, the root folder of the repo is assumed to be the working directory.
 
 ### Part1: Setting up the source kafka cluster
 
@@ -95,6 +96,16 @@ oc -n openshift-user-workload-monitoring get pod
 ** Output should look like above table.
 * https://docs.openshift.com/container-platform/4.8/monitoring/enabling-monitoring-for-user-defined-projects.html[Click here for more].
 
+#### Create the required namespaces
+
+[source,bash]
+----
+# Source Cluster Namespace: source-cluster
+oc create namespace source-cluster -o yaml
+# Target Cluster Namespace: target-cluster
+oc create namespace target-cluster -o yaml
+----
+
 #### Deploy the cluster operator
 ** The cluster-operator CRDs are setup within a subchart named cluster-operator
 ** workdir: parent directory of the root helm chart
@@ -102,14 +113,16 @@ oc -n openshift-user-workload-monitoring get pod
 [source,bash]
 ----
 # Install the cluster-operator sub-chart
-helm install cluster-operator amq-streams-chart/charts/cluster-operator --namespace cluster-source
+oc project source-cluster
+helm install cluster-operator amq-streams-chart/charts/cluster-operator --namespace source-cluster
 # list pods
-oc -n cluster-source get pods -l 'helm.sh/chart=cluster-operator'
+oc -n cluster-source get pods
 ----
 * The output should look like below table
 [source,text]
 ----
-Put output  here
+NAME                                        READY   STATUS    RESTARTS   AGE
+strimzi-cluster-operator-7447d98d84-xcqdk   1/1     Running   0          2m1s
 ----
 
 #### Deploy Kafka
@@ -119,7 +132,8 @@ Put output  here
 [source,bash]
 ----
 # Apply the kafka sub-chart to deploy kafka and its components
-helm install strimzi-cluster amq-streams-chart/charts/kafka --namespace cluster-source
+oc project source-cluster
+helm install strimzi-cluster amq-streams-chart/charts/kafka --namespace source-cluster
 # list pods
 oc -n cluster-source get pods -l 'helm.sh/chart=kafka'
 ----

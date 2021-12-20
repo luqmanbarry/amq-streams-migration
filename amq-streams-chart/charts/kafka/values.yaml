@@ -1,5 +1,6 @@
 
 kafka:
+  name: strimzi-cluster
   replicas: 2
   version: 2.8.0
   config:

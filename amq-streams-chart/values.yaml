@@ -1,6 +1,0 @@
-global:
-  kafka:
-    # Override value if cluster named different
-    clusterName: strimzi-cluster
-    # Override value when deploying to different namespace
-    namespace: source-cluster

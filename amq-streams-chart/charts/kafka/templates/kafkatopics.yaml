@@ -4,7 +4,7 @@ kind: KafkaTopic
 metadata:
   name: topic.high
   labels:
-    strimzi.io/cluster: {{ .Values.global.kafka.clusterName }} . }}
+    strimzi.io/cluster: {{ .Values.kafka.name }} . }}
     app: strimzi
     {{- include "kafka.labels" . | nindent 4 }}
 spec:
@@ -20,7 +20,7 @@ metadata:
   name: topic.low
   labels:
     helm.sh/chart: {{ .Chart.Name }}
-    strimzi.io/cluster: {{ .Values.global.kafka.clusterName }} . }}
+    strimzi.io/cluster: {{ .Values.kafka.name }} . }}
     app: strimzi
     {{- include "kafka.labels" . | nindent 4 }}
 spec:
@@ -35,7 +35,7 @@ kind: KafkaTopic
 metadata:
   name: topic.defaults
   labels:
-    strimzi.io/cluster: {{ .Values.global.kafka.clusterName }} . }}
+    strimzi.io/cluster: {{ .Values.kafka.name }} . }}
     app: strimzi
     {{- include "kafka.labels" . | nindent 4 }}
 spec: {}

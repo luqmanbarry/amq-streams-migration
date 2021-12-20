@@ -127,7 +127,7 @@ data:
             "steppedLine": false,
             "targets": [
               {
-                "expr": "count(kafka_server_replicamanager_leadercount{namespace=~\"{{ include "strimzi-monitoring.namespace" .}}\",strimzi_io_cluster=\"{{ .Values.global.kafka.clusterName }}\"})",
+                "expr": "count(kafka_server_replicamanager_leadercount{namespace=~\"{{ include "strimzi-monitoring.namespace" .}}\",strimzi_io_cluster=\"{{ .Values.kafka.name }}\"})",
                 "interval": "",
                 "legendFormat": "count",
                 "refId": "A"
@@ -284,7 +284,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "kafka_cruisecontrol_anomalydetector_balancedness_score_value{namespace=~\"{{ include "strimzi-monitoring.namespace" .}}\",strimzi_io_cluster=\"{{ .Values.global.kafka.clusterName }}\"}",
+                "expr": "kafka_cruisecontrol_anomalydetector_balancedness_score_value{namespace=~\"{{ include "strimzi-monitoring.namespace" .}}\",strimzi_io_cluster=\"{{ .Values.kafka.name }}\"}",
                 "interval": "",
                 "legendFormat": "Score",
                 "refId": "A"
