@@ -44,9 +44,9 @@ spec:
       size: {{ .Values.kafka.storage.size }}
       type: persistent-claim
     template:
-      podDisruptionBudget:
-        minAvailable: {{ .Values.kafka.template.podDisruptionBudget.minAvailable }}
       pod:
+        podDisruptionBudget:
+          minAvailable: {{ .Values.kafka.template.podDisruptionBudget.minAvailable }}
         terminationGracePeriodSeconds: {{ .Values.kafka.terminationGracePeriodSeconds }}
         affinity:
           podAntiAffinity:
@@ -85,9 +85,9 @@ spec:
       size: {{ .Values.zookeeper.storage.size }}
       type: persistent-claim
     template:
-      podDisruptionBudget:
-        minAvailable: {{ .Values.kafka.template.podDisruptionBudget.minAvailable }}
       pod:
+        podDisruptionBudget:
+          minAvailable: {{ .Values.kafka.template.podDisruptionBudget.minAvailable }}
         terminationGracePeriodSeconds: {{ .Values.kafka.terminationGracePeriodSeconds }}
         affinity:
           podAntiAffinity:
