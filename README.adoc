@@ -472,7 +472,7 @@ IMPORTANT: MirrorMaker2 should be deployed alongside a running target Kafka clus
 [source,bash]
 ----
 # Apply the mirror-maker2 sub-chart
-helm upgrade --install mirror-maker2 amq-streams-chart/charts/mirror-maker2 --namespace ${WORK_NAMESPACE}
+helm upgrade --install mirror-maker2 mirror-maker2/ --namespace ${WORK_NAMESPACE}
 # list the pods to confirm there is a mirrormaker2 pod
 oc --namespace ${WORK_NAMESPACE} get pods
 
