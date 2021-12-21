@@ -34,3 +34,5 @@ dependencies:
   version: 1.0.0
 - name: strimzi-monitoring
   version: 1.0.0
+- name: mirror-maker2
+  version: 1.0.0
