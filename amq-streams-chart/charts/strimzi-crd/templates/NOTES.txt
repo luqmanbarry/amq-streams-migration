@@ -1,0 +1,1 @@
+There should only be one instance of this chart in single OpenShift Cluster.

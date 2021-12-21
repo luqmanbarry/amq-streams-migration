@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: strimzi-cluster-operator-kafka-client-delegation
+  name: strimzi-cluster-operator-kafka-client-delegation-{{ include "cluster-operator.namespace" . }}
   labels:
     app: strimzi
 # The Kafka clients cluster role must be bound to the cluster operator service account so that it can delegate the

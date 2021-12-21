@@ -1,3 +1,11 @@
 Setup the cluster-operator for managing the kafka cluster.
 
 Must be installed before the kafka components.
+
+==== ClusterRoleBinding Renaming
+Since we are deploying multiple amq streams clusters in a single Openshift cluster, 
+I have changed the ClusterRoleBinding resources default name to add the namespace they are associated with.
+This will allow the deployment of multiple instances of the same resource kind associated with different subjects.
+
+Example: Look at amq-streams-chart/charts/cluster-operator/templates/021-ClusterRoleBinding-strimzi-cluster-operator.yaml
+====
