@@ -42,7 +42,7 @@ data:
                 {
                   "evaluator": {
                     "params": [
-                      3
+                      2
                     ],
                     "type": "lt"
                   },
@@ -355,312 +355,6 @@ data:
                 {
                   "evaluator": {
                     "params": [
-                      100
-                    ],
-                    "type": "lt"
-                  },
-                  "operator": {
-                    "type": "and"
-                  },
-                  "query": {
-                    "params": [
-                      "A",
-                      "1m",
-                      "now"
-                    ]
-                  },
-                  "reducer": {
-                    "params": [],
-                    "type": "diff"
-                  },
-                  "type": "query"
-                }
-              ],
-              "executionErrorState": "alerting",
-              "for": "3m",
-              "frequency": "1m",
-              "handler": 1,
-              "message": "No messages for emp.* in the past minute.",
-              "name": "EMP Messages In Total Alert",
-              "noDataState": "no_data",
-              "notifications": [
-                {
-                  "uid": "slack1"
-                },
-                {
-                  "uid": "msteams1"
-                }
-              ]
-            },
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            },
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-              "h": 8,
-              "w": 24,
-              "x": 0,
-              "y": 56
-            },
-            "hiddenSeries": false,
-            "id": 11,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "nullPointMode": "null",
-            "options": {
-              "alertThreshold": true
-            },
-            "percentage": false,
-            "pluginVersion": "7.5.11",
-            "pointradius": 2,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "expr": "sum(kafka_server_brokertopicmetrics_messagesin_total{topic=~\"emp.*\",namespace=~\"{{ include "strimzi-monitoring.namespace" .}}\"})",
-                "interval": "",
-                "legendFormat": "Messages",
-                "refId": "A"
-              }
-            ],
-            "thresholds": [
-              {
-                "colorMode": "critical",
-                "fill": true,
-                "line": true,
-                "op": "lt",
-                "value": 100,
-                "visible": true
-              }
-            ],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "EMP Messages in Total Alert",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ],
-            "yaxis": {
-              "align": false,
-              "alignLevel": null
-            }
-          },
-          {
-            "alert": {
-              "alertRuleTags": {
-                
-                "openshift_version": "4.8",
-                "environment": "{{ include "strimzi-monitoring.namespace" . }}",
-                "strimzi_instance": "{{ .Release.Name }}",
-                "severity": "warning"
-              },
-              "conditions": [
-                {
-                  "evaluator": {
-                    "params": [
-                      50000
-                    ],
-                    "type": "gt"
-                  },
-                  "operator": {
-                    "type": "and"
-                  },
-                  "query": {
-                    "params": [
-                      "A",
-                      "1m",
-                      "now"
-                    ]
-                  },
-                  "reducer": {
-                    "params": [],
-                    "type": "max"
-                  },
-                  "type": "query"
-                }
-              ],
-              "executionErrorState": "alerting",
-              "for": "3m",
-              "frequency": "1m",
-              "handler": 1,
-              "message": "Consumer group ${labels.consumergroup} lag is too big ( ${value}) on topic ${labels.topic}/partition ${labels.partition}",
-              "name": "logstash2elastic Consumer Group Lag Alert alert",
-              "noDataState": "no_data",
-              "notifications": [
-                {
-                  "uid": "slack1"
-                },
-                {
-                  "uid": "msteams1"
-                }
-              ]
-            },
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus",
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            },
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-              "h": 8,
-              "w": 24,
-              "x": 0,
-              "y": 88
-            },
-            "hiddenSeries": false,
-            "id": 15,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "nullPointMode": "null",
-            "options": {
-              "alertThreshold": true
-            },
-            "percentage": false,
-            "pluginVersion": "7.5.11",
-            "pointradius": 2,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "expr": "kafka_consumergroup_lag{consumergroup=~\"logstash2elastic\",namespace=\"{{ include "strimzi-monitoring.namespace" .}}\"}",
-                "interval": "",
-                "legendFormat": "{{`{{consumergroup}} / {{topic}`}}}",
-                "refId": "A"
-              }
-            ],
-            "thresholds": [
-              {
-                "colorMode": "critical",
-                "fill": true,
-                "line": true,
-                "op": "gt",
-                "value": 1000,
-                "visible": true
-              }
-            ],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "logstash2elastic Consumer Group Lag Alert",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ],
-            "yaxis": {
-              "align": false,
-              "alignLevel": null
-            }
-          },
-          {
-            "alert": {
-              "alertRuleTags": {
-                
-                "openshift_version": "4.8",
-                "environment": "{{ include "strimzi-monitoring.namespace" . }}",
-                "strimzi_instance": "{{ .Release.Name }}",
-                "severity": "warning"
-              },
-              "conditions": [
-                {
-                  "evaluator": {
-                    "params": [
                       50000
                     ],
                     "type": "gt"
@@ -899,7 +593,7 @@ data:
             "steppedLine": false,
             "targets": [
               {
-                "expr": "kafka_topic_partition_under_replicated_partition{namespace=\"{{ include "strimzi-monitoring.namespace" .}}\",topic!~\"__.*\",topic!~\"-.*\",topic!~\"beginning\"}",
+                "expr": "kafka_topic_partition_under_replicated_partition{namespace=\"{{ include "strimzi-monitoring.namespace" .}}\",topic!~\"strimzi.*|__.*|-.*|beginning\"}",
                 "interval": "",
                 "legendFormat": "{{`{{topic}} / {{partition}}`}}",
                 "refId": "A"
@@ -1582,7 +1276,7 @@ data:
                 {
                   "evaluator": {
                     "params": [
-                      3
+                      2
                     ],
                     "type": "lt"
                   },
@@ -1735,7 +1429,7 @@ data:
                 {
                   "evaluator": {
                     "params": [
-                      3
+                      2
                     ],
                     "type": "lt"
                   },
@@ -1889,7 +1583,7 @@ data:
                 {
                   "evaluator": {
                     "params": [
-                      2147483648
+                      805306368
                     ],
                     "type": "lt"
                   },

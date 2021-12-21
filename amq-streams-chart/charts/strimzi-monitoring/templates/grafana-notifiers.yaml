@@ -19,21 +19,11 @@ stringData:
         frequency: 1h
         disable_resolve_message: false
         settings:
-          recipient: {{ .Values.grafana.notifiers.slack.recipient | quote }}
           uploadImage: true
           autoClose: true
         secure_settings:
           token: ${GRAFANA_NOTIFIERS_SLACK_TOKEN} 
           url: ${GRAFANA_NOTIFIERS_SLACK_URL}
-      - name: 'Teams'
-        type: teams
-        uid: msteams1
-        is_default: false
-        send_reminder: false
-        frequency: 1h
-        disable_resolve_message: false
-        settings:
-          url: ${GRAFANA_NOTIFIERS_TEAMS_URL}
     delete_notifiers:
     - name: 'Slack'
       uid: 'slack1'

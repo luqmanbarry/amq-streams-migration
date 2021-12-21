@@ -125,19 +125,3 @@ data:
   strimzi-kafka-connect.json: |
     {{- .Files.Get "examples/metrics/grafana-dashboards/strimzi-kafka-connect.json" | nindent 4 }}
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: grafana-configs-secret
-  namespace: {{ include "strimzi-monitoring.namespace" . }}
-  labels:
-    helm.sh/chart: {{ .Chart.Name }}
-    app: strimzi
-    {{- include "strimzi-monitoring.labels" . | nindent 4 }}
-stringData:
-  GRAFANA_ADMIN_USERNAME: {{ .Values.grafana.adminUsername | quote }}
-  GRAFANA_ADMIN_PASSWORD: {{ .Values.grafana.adminPassword | quote }}
-  GRAFANA_NOTIFIERS_SLACK_TOKEN: {{ .Values.grafana.notifiers.slack.token | quote }} 
-  GRAFANA_NOTIFIERS_SLACK_URL: {{ .Values.grafana.notifiers.slack.url | quote }}
-  GRAFANA_NOTIFIERS_TEAMS_URL: {{ .Values.grafana.notifiers.teams.url | quote }}
----

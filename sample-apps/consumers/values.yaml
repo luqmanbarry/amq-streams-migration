@@ -1,10 +1,6 @@
 # Custom consumer configs here
 
 # Custom producer configs here
-
-global:
-  kafka:
-    # Override value if cluster named different
-    clusterName: strimzi-cluster
-    # Override value when deploying to different namespace
-    namespace: source-cluster
+kafka:
+  # Override value if cluster named different
+  name: strimzi-cluster

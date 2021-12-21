@@ -8,7 +8,7 @@ metadata:
     app: strimzi
     {{- include "strimzi-monitoring.labels" . | nindent 4 }}
 spec:
-  host: "{{ .Values.grafana.host }}"
+  host: "{{ .Values.grafana.hostname }}-{{ include "strimzi-monitoring.namespace" . }}{{ .Values.grafana.hostDomain }}"
   port:
     targetPort: grafana
   tls:

@@ -8,7 +8,7 @@ metadata:
     app: strimzi
     {{- include "kafka.labels" . | nindent 4 }}
 spec:
-  partitions: 5
+  partitions: 3
   replicas: 2
   config:
     min.insync.replicas: '1'

@@ -2,21 +2,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: producer-low
-  name: producer-low
+    app: consumer-high
+  name: consumer-high
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: producer-low
+      app: consumer-high
   template:
     metadata:
       labels:
-        app: producer-low
+        app: consumer-high
     spec:
       containers:
-      - name: producer-low
-        image: strimzi/hello-world-producer:latest
+      - name: consumer-high
+        image: strimzi/hello-world-consumer:latest
         resources:
           limits:
             cpu: "200m"
@@ -26,16 +26,13 @@ spec:
             memory: 256Mi
         env:
           - name: BOOTSTRAP_SERVERS
-            value: {{ .Values.kafka.name }}-kafka-bootstrap.{{ .Values.global.kafka.namespace }}.cluster.local:9092
+            value: {{ .Values.kafka.name }}-kafka-bootstrap.{{ include "consumers.namespace" . }}.svc.cluster.local:9092
           - name: TOPIC
-            value: "topic.low"
-          # Lower value means high data ingestion volume
-          - name: DELAY_MS
-            value: "500"
+            value: "topic.high"
           - name: LOG_LEVEL
             value: "INFO"
           - name: MESSAGE_COUNT
-            value: "5000"
+            value: "1000000"
           # Set to make data push faster
-          - name: PRODUCER_ACKS
-            value: "all"
+          - name: GROUP_ID
+            value: "consumer-high"

@@ -26,18 +26,16 @@ spec:
             memory: 256Mi
         env:
           - name: BOOTSTRAP_SERVERS
-            value: {{ .Values.kafka.name }}-kafka-bootstrap.{{ .Values.global.kafka.namespace }}.cluster.local:9092
+            value: {{ .Values.kafka.name }}-kafka-bootstrap.{{ include "producers.namespace" . }}.svc.cluster.local:9092
           - name: TOPIC
             value: "topic.high"
-          # Lower value means high data ingestion volume
           - name: DELAY_MS
             value: "100"
           - name: LOG_LEVEL
             value: "INFO"
           - name: MESSAGE_COUNT
-            value: "100000"
+            value: "1000000"
           - name: MESSAGES_PER_TRANSACTION
-            value: 50
-          # Set to make data push faster
+            value: "50"
           - name: PRODUCER_ACKS
             value: "0"

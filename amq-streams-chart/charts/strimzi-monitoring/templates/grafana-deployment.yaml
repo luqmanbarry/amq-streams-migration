@@ -44,6 +44,11 @@ spec:
             secretKeyRef:
               name: grafana-configs-secret
               key: GRAFANA_NOTIFIERS_TEAMS_URL
+        - name: GRAFANA_ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: grafana-configs-secret
+              key: GRAFANA_ADMIN_USERNAME
         - name: GRAFANA_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:

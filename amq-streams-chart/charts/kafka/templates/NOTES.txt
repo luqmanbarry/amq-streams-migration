@@ -8,3 +8,8 @@ Installs the kafka cluster including the following:
     CruiseControl
     KafkaRebalance
     JmxMetrics
+
+====
+The examples/metrics directory is just a copy of the the same in amq-streams-1.8 directory provided by AMQ Streams docs.
+The reason behind this is that helm cannot access the filesystem outside of the chart root directory.
+====

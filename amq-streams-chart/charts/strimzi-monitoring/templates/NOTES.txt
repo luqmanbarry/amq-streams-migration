@@ -2,4 +2,15 @@ This chart install grafana and all the necessary components for monitoring and a
 
 You need to update the grafana.datasource.url to point to your prometheus server.
 
-Make sure your provide correct values of grafana configs in the values.yaml file.
+Make sure you provide correct values for grafana configs in the values.yaml file.
+
+==== Update dashboards
+Update the grafana-dashboards .json files with sed -i 's/\${DS_PROMETHEUS}/Prometheus/'
+find amq-streams-chart/charts/strimzi-monitoring/examples/metrics/grafana-dashboards -type f -name "*.json" -print0 | xargs -0 sed -i 's/\${DS_PROMETHEUS}/Prometheus/'
+====
+
+==== NOTIFIERS
+To add more notification channels, configure the grafana-notifiers.yaml file.
+More info here: https://grafana.com/docs/grafana/latest/administration/provisioning/
+====
+

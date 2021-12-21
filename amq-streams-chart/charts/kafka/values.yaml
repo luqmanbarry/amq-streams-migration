@@ -10,7 +10,7 @@ kafka:
     log.retention.hours: 24
     log.segment.bytes: 104857600
     min.insync.replicas: 1
-    num.partitions: 5
+    num.partitions: 3
     num.recovery.threads.per.data.dir: 8
     offsets.topic.replication.factor: 2
     transaction.state.log.min.isr: 1

@@ -1,6 +1,11 @@
+kafka:
+  name: strimzi-cluster
 grafana:
+  # You might pass these values are chart install time
+  adminUsername: admin
   adminPassword: admin
-  host: strimzi-grafana.apps.cluster-ceda.ceda.sandbox1278.opentlc.com
+  hostname: grafana
+  hostDomain: ".apps.cluster-ceda.ceda.sandbox1278.opentlc.com"
   clientId: my-oauth-clientId
   clientSecret: my-oauth-clientSecret
   scopes: "openid profile email"
@@ -11,10 +16,11 @@ grafana:
   storage: 2Gi
   storageClassName: gp2
   replicas: 1
+  # Change grafana theme -- black or light
   uiTheme: light
   datasource:
     # Update me, I should be your prometheus server route host
-    url: thanos-querier-openshift-monitoring.apps.cluster-ceda.ceda.sandbox1278.opentlc.com
+    url: https://thanos-querier.openshift-monitoring.svc.cluster.local:9091
   notifiers:
     slack:
       username: username-here
@@ -22,4 +28,4 @@ grafana:
       token: VERYs3c4reToken
       recipient: team-channel
     teams:
-      url: https://your-teams-webhook
+      url: https://your-teams-webhook/4589727885/
