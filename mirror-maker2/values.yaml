@@ -1,0 +1,72 @@
+kafkaMirrorMaker2:
+  version: "2.8.0"
+  name: strimzi-mirrormaker2
+  replicas: 1
+  connectCluster: strimzi-target-cluster
+  mirrors:
+    - checkpointConnector:
+        config:
+          checkpoints.topic.replication.factor: 2
+          emit.checkpoints.interval.seconds: 60
+          refresh.groups.interval.seconds: 600
+          refresh.topics.interval.seconds: 600
+          replication.policy.class: io.strimzi.kafka.connect.mirror.IdentityReplicationPolicy
+          sync.group.offsets.enabled: true
+          sync.group.offsets.interval.seconds: 60
+      groupsPattern: .*
+      heartbeatConnector:
+        config:
+          heartbeats.topic.replication.factor: 2
+      sourceConnector:
+        config:
+          offset-syncs.topic.replication.factor: 2
+          replication.factor: 2
+          replication.policy.class: io.strimzi.kafka.connect.mirror.IdentityReplicationPolicy
+          sync.topic.acls.enabled: false
+          sync.topic.configs.enabled: true
+          receive.buffer.bytes: 33554432
+          send.buffer.bytes: 33554432
+          auto.offset.reset: earliest
+        tasksMax: 20
+      sourceCluster: strimzi-source-cluster
+      targetCluster: strimzi-target-cluster
+      topicsPattern: topic.*
+  clusters:
+    - alias: strimzi-source-cluster
+      bootstrapServers: 'strimzi-cluster-kafka-bootstrap.source-cluster.svc.cluster.local:9092'
+      config:
+        config.storage.replication.factor: 2
+        offset.storage.replication.factor: 2
+        status.storage.replication.factor: 2
+    - alias: strimzi-target-cluster
+      bootstrapServers: 'strimzi-cluster-kafka-bootstrap.target-cluster.svc.cluster.local:9092'
+      config:
+        status.storage.replication.factor: 2
+        config.storage.replication.factor: 2
+        offset.storage.replication.factor: 2
+  resources:
+    limits:
+      cpu: '1000m'
+      memory: 1000Mi
+    requests:
+      cpu: '100m'
+      memory: 1000Mi
+  readinessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+  livenessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+  jvmOptions:
+    '-Xms': 256M
+    '-Xmx': 256M
+  logging:
+    loggers:
+      connect.root.logger.level: INFO
+    type: inline
+  metricsConfig:
+    type: jmxPrometheusExporter
+    valueFrom:
+      configMapKeyRef:
+        key: metrics-config.yml
+        name: mirror-maker-2-metrics

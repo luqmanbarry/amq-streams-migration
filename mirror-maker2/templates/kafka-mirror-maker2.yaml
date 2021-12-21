@@ -1,0 +1,32 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaMirrorMaker2
+metadata:
+  name: {{ .Values.kafkaMirrorMaker2.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ include "mirror-maker2.namespace" . }}
+  labels:
+    name: {{ include "mirror-maker2.name" . }}
+    {{- include "mirror-maker2.labels" . | nindent 4 }}
+spec:
+  version: {{ .Values.kafkaMirrorMaker2.version }}
+  replicas: {{ .Values.kafkaMirrorMaker2.replicas }}
+  connectCluster: {{ .Values.kafkaMirrorMaker2.connectCluster }}
+  clusters:
+    {{- toYaml .Values.kafkaMirrorMaker2.clusters | nindent 4 }}
+  mirrors:
+    {{- toYaml .Values.kafkaMirrorMaker2.mirrors | nindent 4 }}
+  resources:
+    {{- toYaml .Values.kafkaMirrorMaker2.resources | nindent 4 }}
+  logging:
+    {{- toYaml .Values.kafkaMirrorMaker2.logging | nindent 4 }}
+  readinessProbe:
+    {{- toYaml .Values.kafkaMirrorMaker2.readinessProbe | nindent 4 }}
+  livenessProbe:
+    {{- toYaml .Values.kafkaMirrorMaker2.livenessProbe | nindent 4 }}
+  jvmOptions:
+    {{- toYaml .Values.kafkaMirrorMaker2.jvmOptions | nindent 4 }}
+  metricsConfig:
+    type: jmxPrometheusExporter
+    valueFrom:
+      configMapKeyRef:
+        name: mirror-maker-2-metrics
+        key: metrics-config.yml
