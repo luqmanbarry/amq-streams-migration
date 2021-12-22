@@ -212,10 +212,10 @@ strimzi-cluster-operator-74574b6484-rcxdm          1/1     Running   0          
 strimzi-cluster-zookeeper-0                        1/1     Running   0          21m
 strimzi-cluster-zookeeper-1                        1/1     Running   0          20m
 ----
-+
-** If you don't see below output, troubleshoot by:
-*** making sure you have enough resources(cpu, memory) on the nodes
-*** `oc describe` the sts, deployment, pods; you might find some indicators.
+
+* If you don't see below output, troubleshoot by:
+** making sure you have enough resources(cpu, memory) on the nodes
+** `oc describe` the sts, deployment, pods; you might find some indicators.
 
 *Progress Check:*
 
