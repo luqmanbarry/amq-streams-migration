@@ -477,7 +477,7 @@ image:images/kafka-target-cluster.png[grafana target cluster]
 *Progress Check:*
 +
 * We should have the following charts installed
-+
+
 [source,bash]
 ----
 # command
