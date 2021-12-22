@@ -52,6 +52,7 @@ IMPORTANT: You need _cluster-admin_ role on the cluster to execute most of the t
 * Grafana v7.5.11
 * projects/namespaces: source-cluster, target-cluster
 * helm v3.6.2
+* for optimal performance, each node should have at least 4 CPU cores, 8Gb for memory and 10Gb for PersistentVolume.
 
 Because this demo uses multiple components to setup the entire cluster, we will use the concept of sub-chart whereby we have modules for:
 * user-workload-monitoring -- creates the user-workload monitoring enabler ConfigMap.
