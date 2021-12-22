@@ -553,6 +553,35 @@ strimzi-mirrormaker2-mirrormaker2-5f894fbbbc-h5szc   1/1     Running   0        
 When MM2 is successful setup, the MirrorMaker2 dashboard in grafana will look like below:app-name: 
 image::imges/grafana-mirror-maker2.png[grafana-mirrormaker2]
 
+### Cleanup -- Optional
+
+Execute the following commands to remove all deployed resources
+
+. Tear down target cluster
++
+[source,bash]
+----
+export WORK_NAMESPACE="target-cluster"
+helm uninstall mirror-maker2 --namespace ${WORK_NAMESPACE}
+helm uninstall strimzi-monitoring --namespace ${WORK_NAMESPACE}
+helm uninstall strimzi-cluster --namespace ${WORK_NAMESPACE}
+helm uninstall cluster-operator --namespace ${WORK_NAMESPACE}
+oc delete namespace ${WORK_NAMESPACE}
+----
++
+. Tear down target cluster
++
+[source,bash]
+----
+export WORK_NAMESPACE="source-cluster"
+helm uninstall strimzi-monitoring --namespace ${WORK_NAMESPACE}
+helm uninstall strimzi-cluster --namespace ${WORK_NAMESPACE}
+helm uninstall cluster-operator --namespace ${WORK_NAMESPACE}
+helm uninstall strimzi-crd --namespace ${WORK_NAMESPACE}
+helm uninstall user-workload-monitoring --namespace ${WORK_NAMESPACE}
+oc delete namespace ${WORK_NAMESPACE}
+----
+
 ### Conclusion
 
 In this guide we've gone through the steps of:
