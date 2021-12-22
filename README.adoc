@@ -194,9 +194,9 @@ user-workload-monitoring        source-cluster  1               2021-12-21 17:27
 # Apply the kafka sub-chart to deploy kafka and its components
 helm upgrade --install strimzi-cluster amq-streams-chart/charts/kafka --namespace ${WORK_NAMESPACE}
 ----
-+
+
 * After about 5min, the output should look like below table
-+
+
 [source,bash]
 ----
 # list pods
