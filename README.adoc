@@ -488,12 +488,38 @@ kafka                   target-cluster  1               2021-12-21 12:26:18.3602
 strimzi-monitoring      target-cluster  1               2021-12-21 12:38:34.450056 -0600 CST    deployed        strimzi-monitoring-1.0.0        1.8          
 ----
 
-### Part3: Deploying MirrorMaker2 to enable cluster mirroring
+### Demonstrating grafana alerting
+
+Alerts are setup as part of applying the strimzi-monitoring chart. 
+
+*Implementation*
+
+* I manually created the alerts on a new *non-parameterized* dashboard;
+* exported the dashboard and created a ConfigMap with key alerts.json and content the json file;
+* look at `amq-streams-chart/charts/strimzi-monitoring/templates/grafana-alerts.yaml` for an example.
+** You may build on it and add more alerts, but make sure you update the coordinates("gridPos:") of each new panel to reflect positioning on the dashboard.
+* In this guide, I chose slack as the alerts destination; however you can add more integration channels.
+** https://grafana.com/docs/grafana/latest/administration/provisioning/[Read more here]
+** Also look at `amq-streams-chart/chats/strimzi-monitoring/templates/grafana-notifiers.yaml` for how it's done in this guide.
+
+* Grafana Alerts dashboard*
+
+image:images/grafana-alerts-dashboard.png[grafana alerts]
+
+* Alerts in Slack
+
+image:images/slack-channel-alerts.png[grafana alerts]
+
+* Alerts in OpenShift which are setup with PrometheusRule, Alertmanager ConfigMap resources
+
+image:images/prometheus-rules-alerts.png[grafana alerts]
+
+### Part4: Deploying MirrorMaker2 to enable cluster mirroring
 
 This deployment follows the one-way migration approach whereby the replication process flows in one direction: source-to-target.
 
-#### Architecture Overview
-image:images/mirror-maker2.png[mirror-maker-2 one way replication]
+#### Architecture Review
+image:images/architecture.png[mirror-maker-2 one way replication]
 
 #### Deploy the MirrorMaker2 instance
 
