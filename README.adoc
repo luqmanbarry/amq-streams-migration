@@ -527,7 +527,7 @@ image:images/architecture.png[mirror-maker-2 one way replication]
 IMPORTANT: MirrorMaker2 should be deployed alongside a running target Kafka cluster.
 
 * This MM2 instance is setup in an *active/passive* mode; meaning mirrored data flows in one direction, source to target or left to right.
-* The MM2 instance is also setup to begin replication from the *_earliest_* message and work its way to the *_latest_* message.
+* MM2 is also setup to begin replication from the *_earliest_* message and work its way to the *_latest_* message.
 
 [source,bash]
 ----
