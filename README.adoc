@@ -213,9 +213,11 @@ strimzi-cluster-zookeeper-0                        1/1     Running   0          
 strimzi-cluster-zookeeper-1                        1/1     Running   0          20m
 ----
 
-* If you don't see below output, troubleshoot by:
+* If you don't see above output, troubleshoot by:
 ** making sure you have enough resources(cpu, memory) on the nodes
 ** `oc describe` the sts, deployment, pods; you might find some indicators.
+** If issues related to probes failures, make sure resources(cpu, memory) allocations are enough;
+** If using tls certificates, make sure the certs are valid.
 
 *Progress Check:*
 
@@ -238,7 +240,7 @@ user-workload-monitoring        source-cluster  1               2021-12-21 17:27
 *Prerequisites:*
 
 * User workload monitoring must be enabled before attempting to deploy the monitoring resources for the strimzi cluster. 
-* I have added the workload monitoring enabler subchart.
+* I have added the user workload monitoring enabler subchart: `amq-streams-chart/charts/strimzi-monitoring`;
 * In `amq-streams-chart/charts/strimzi-monitoring/examples/metrics/grafana-dashboards/`, replace all instances of `${DS_PROMETHEUS}` by `Prometheus`.
 * In `amq-streams-chart/charts/strimzi-monitoring/values.yaml`, update `hostDomain` to your cluster domain name.
 * in `examples/metrics/grafana-dashboards`, replace all instances of ${DS_PROMETHEUS} by the data source name: Prometheus
@@ -474,11 +476,11 @@ strimzi-cluster-zookeeper-1                       1/1     Running   0          1
 ----
 +
 . Apply the strimzi-monitoring sub-chart
-+
+
 *Prerequisites:*
-+
+
 * In `amq-streams-chart/charts/strimzi-monitoring/values.yaml`, update `hostDomain` to your cluster domain name.
-+
+
 [source,bash]
 ----
 # Apply the helm chart
@@ -492,13 +494,14 @@ strimzi-cluster-kafka-external-0           strimzi-cluster-kafka-external-0-targ
 strimzi-cluster-kafka-external-1           strimzi-cluster-kafka-external-1-target-cluster.apps.cluster-ceda.ceda.sandbox1278.opentlc.com                  strimzi-cluster-kafka-external-1
 strimzi-cluster-kafka-external-bootstrap   strimzi-cluster-kafka-external-bootstrap-target-cluster.apps.cluster-ceda.ceda.sandbox1278.opentlc.com  
 ----
-+
+
 * `admin` is the default username and password.
 * If all goes as expected, you should see below diagram
+
 image:images/kafka-target-cluster.png[grafana target cluster]
 
 *Progress Check:*
-+
+
 * We should have the following charts installed
 
 [source,bash]
