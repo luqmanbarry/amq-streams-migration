@@ -183,7 +183,7 @@ helm upgrade --install strimzi-cluster amq-streams-chart/charts/kafka --namespac
 * After about 5min, the output should look like below table
 ** If you don't see below output, troubleshoot by:
 *** making sure you have enough resources(cpu, memory) on the nodes
-*** `oc describe` the the sts, deployment, pods; you might find some indicators.
+*** `oc describe` the sts, deployment, pods; you might find some indicators.
 +
 [source,bash]
 ----
@@ -202,6 +202,7 @@ strimzi-cluster-zookeeper-1                        1/1     Running   0          
 ----
 
 *Progress Check:*
+
 * We should have the following charts installed
 [source,bash]
 ----
@@ -500,9 +501,9 @@ Alerts are setup as part of applying the strimzi-monitoring chart.
 ** You may build on it and add more alerts, but make sure you update the coordinates("gridPos:") of each new panel to reflect positioning on the dashboard.
 * In this guide, I chose slack as the alerts destination; however you can add more integration channels.
 ** https://grafana.com/docs/grafana/latest/administration/provisioning/[Read more here]
-** Also look at `amq-streams-chart/chats/strimzi-monitoring/templates/grafana-notifiers.yaml` for how it's done in this guide.
+** Take a look at `amq-streams-chart/chats/strimzi-monitoring/templates/grafana-notifiers.yaml` for how it is done in this guide.
 
-* Grafana Alerts dashboard*
+* Grafana Alerts dashboard
 
 image:images/grafana-alerts-dashboard.png[grafana alerts]
 
