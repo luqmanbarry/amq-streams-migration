@@ -110,7 +110,9 @@ oc -n openshift-user-workload-monitoring get pod
 * https://docs.openshift.com/container-platform/4.8/monitoring/enabling-monitoring-for-user-defined-projects.html[Click here for more on user-workload monitoring].
 
 *Progress Check:*
+
 * We should have the following charts installed
+
 [source,bash]
 ----
 helm list
@@ -129,7 +131,9 @@ helm upgrade --install strimzi-crd amq-streams-chart/charts/strimzi-crd --namesp
 ----
 
 *Progress Check:*
+
 * We should have the following charts installed
+
 [source,bash]
 ----
 # command
@@ -141,15 +145,19 @@ user-workload-monitoring        source-cluster  1               2021-12-21 17:27
 ----
 
 #### Deploy the cluster operator
+
 * The cluster-operator CRDs are setup within a subchart named cluster-operator
 * workdir: parent directory of the root helm chart
 * you could add --dry-run to preview actions taken by helm
+
 [source,bash]
 ----
 # Install the cluster-operator sub-chart
 helm upgrade --install cluster-operator amq-streams-chart/charts/cluster-operator --namespace ${WORK_NAMESPACE}
 ----
+
 * The output should look like below table
+
 [source,bash]
 ----
 # List pods and wait until cluster-operator pod is in a Running state.
@@ -158,10 +166,11 @@ oc --namespace ${WORK_NAMESPACE} get pods
 NAME                                        READY   STATUS    RESTARTS   AGE
 strimzi-cluster-operator-7447d98d84-xcqdk   1/1     Running   0          2m1s
 ----
-+
 
 *Progress Check:*
+
 * We should have the following charts installed
+
 [source,bash]
 ----
 # command
@@ -174,6 +183,7 @@ user-workload-monitoring        source-cluster  1               2021-12-21 17:27
 ----
 
 #### Deploy Kafka and related components
+
 ** The cluster-operator must be deployed and running first
 ** The kafka components are declared within a sub-chart named kafka.
 
@@ -206,6 +216,7 @@ strimzi-cluster-zookeeper-1                        1/1     Running   0          
 *Progress Check:*
 
 * We should have the following charts installed
+
 [source,bash]
 ----
 # command
@@ -274,17 +285,22 @@ t=2021-12-20T23:22:40+0000 lvl=info msg="New state change" logger=alerting.resul
 +
 * After verifying there are no errors in the grafana pod logs, grab the *grafana* route and open it via a browser.
 ** Default username and password is `admin`; you may change it by passing values during helm install command.
++
 [source,bash]
 ----
 oc get route --namespace ${WORK_NAMESPACE}
 ----
++
 * Below represent what the Kafka dashboard might look like.
+
 image::images/grafana-kafka.png[grafana-kafka]
 
 Now that we've setup our source kafka cluster, let's deploy some sample apps.
 
 *Progress Check:*
+
 * We should have the following charts installed
+
 [source,bash]
 ----
 # command
@@ -417,6 +433,7 @@ oc project ${WORK_NAMESPACE}
 #### Deploying cluster-operator, kafka, strimzi-monitoring
 
 Follow the same steps in *Part1* to setup the target-cluster:
+
 * The strimzi-crd sub-chart is not required here; its installation is cluster-wide.
 
 . Apply the cluster-operator sub-chart
@@ -522,6 +539,7 @@ image:images/prometheus-rules-alerts.png[grafana alerts]
 This deployment follows the one-way migration approach whereby the replication process flows in one direction: source-to-target.
 
 #### Architecture Review
+
 image:images/architecture.png[mirror-maker-2 one way replication]
 
 #### Deploy the MirrorMaker2 instance
