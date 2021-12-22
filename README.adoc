@@ -122,7 +122,7 @@ user-workload-monitoring        source-cluster  1               2021-12-20 19:43
 
 #### Deploy the strimzi CRDs and ClusterRoles
 
-IMPORTANT: This step is required and only execute once per OpenShift cluster
+IMPORTANT: This step is required and only executed once per OpenShift cluster
 
 [source,bash]
 ----
@@ -184,6 +184,8 @@ user-workload-monitoring        source-cluster  1               2021-12-21 17:27
 
 #### Deploy Kafka and related components
 
+*Prerequisites:*
+
 ** The cluster-operator must be deployed and running first
 ** The kafka components are declared within a sub-chart named kafka.
 
@@ -192,10 +194,8 @@ user-workload-monitoring        source-cluster  1               2021-12-21 17:27
 # Apply the kafka sub-chart to deploy kafka and its components
 helm upgrade --install strimzi-cluster amq-streams-chart/charts/kafka --namespace ${WORK_NAMESPACE}
 ----
++
 * After about 5min, the output should look like below table
-** If you don't see below output, troubleshoot by:
-*** making sure you have enough resources(cpu, memory) on the nodes
-*** `oc describe` the sts, deployment, pods; you might find some indicators.
 +
 [source,bash]
 ----
@@ -212,6 +212,10 @@ strimzi-cluster-operator-74574b6484-rcxdm          1/1     Running   0          
 strimzi-cluster-zookeeper-0                        1/1     Running   0          21m
 strimzi-cluster-zookeeper-1                        1/1     Running   0          20m
 ----
++
+** If you don't see below output, troubleshoot by:
+*** making sure you have enough resources(cpu, memory) on the nodes
+*** `oc describe` the sts, deployment, pods; you might find some indicators.
 
 *Progress Check:*
 
