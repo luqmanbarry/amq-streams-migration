@@ -380,7 +380,7 @@ data:
               "for": "5m",
               "frequency": "1m",
               "handler": 1,
-              "message": "Consumer group ${labels.consumergroup}  lag is too big ( ${value } ) on topic ${labels.topic} /partition ${labels.partition}",
+              "message": "Consumer group {{Labels.consumergroup}}  lag is too big ( {{value}} ) on topic {{Labels.topic}}/partition {{Labels.partition}}",
               "name": "TooLargeConsumerGroupLag alert",
               "noDataState": "no_data",
               "notifications": [
@@ -534,7 +534,7 @@ data:
               "for": "5m",
               "frequency": "1m",
               "handler": 1,
-              "message": "Topic  ${labels.topic} has ${value } under-replicated partition ${labels.partition}",
+              "message": "Topic  {{Labels.topic}} has {{value}} under-replicated partition {{Labels.partition}}",
               "name": "Under Replicated Topic Partition alert",
               "noDataState": "no_data",
               "notifications": [
@@ -1608,7 +1608,7 @@ data:
               "for": "5m",
               "frequency": "1m",
               "handler": 1,
-              "message": "There are only ${value} bytes available at ${labels.persistentvolumeclaim} PVC",
+              "message": "There are only {{value}} bytes available at {{Labels.persistentvolumeclaim}} PVC",
               "name": "Zookeeper Running Out Of Space alert",
               "noDataState": "no_data",
               "notifications": [
@@ -1767,7 +1767,7 @@ data:
               "for": "5m",
               "frequency": "1m",
               "handler": 1,
-              "message": "There are only ${value} bytes available at ${labels.persistentvolumeclaim} PVC",
+              "message": "There are only {{value}} bytes available at {{Labels.persistentvolumeclaim}} PVC",
               "name": "Kafka Running Out Of Space alert",
               "noDataState": "no_data",
               "notifications": [

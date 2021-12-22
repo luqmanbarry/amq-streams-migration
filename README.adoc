@@ -65,6 +65,16 @@ Because this demo uses multiple components to setup the entire cluster, we will 
 
 ### Part1: Setting up the source kafka cluster
 
+#### Create the source-cluster namespace
+
+[source,bash]
+----
+# Source Cluster Namespace: source-cluster
+oc create namespace source-cluster -o yaml
+export WORK_NAMESPACE="source-cluster"
+oc project ${WORK_NAMESPACE}
+----
+
 #### Enable user workload monitoring -- If not enabled
 
 * Check if user-workload monitoring is enabled
@@ -88,9 +98,9 @@ thanos-ruler-user-workload-0         3/3     Running   0          55s
 +
 [source,bash]
 ----
-# Install the cluster-operator sub-chart
+# Install the user-workload-monitoring sub-chart
 helm upgrade --install user-workload-monitoring amq-streams-chart/charts/user-workload-monitoring --namespace ${WORK_NAMESPACE}
-# list pods
+# list monitoring pods
 oc -n openshift-user-workload-monitoring get pod
 ----
 +
@@ -106,16 +116,6 @@ NAME                            NAMESPACE       REVISION        UPDATED         
 user-workload-monitoring        source-cluster  1               2021-12-20 19:43:49.740817957 +0000 UTC deployed        user-workload-monitoring-1.0.0  1.8    
 ----
 
-#### Create the source-cluster namespace
-
-[source,bash]
-----
-# Source Cluster Namespace: source-cluster
-oc create namespace source-cluster -o yaml
-export WORK_NAMESPACE="source-cluster"
-oc project ${WORK_NAMESPACE}
-----
-
 #### Deploy the strimzi CRDs and ClusterRoles
 
 IMPORTANT: This step is required and only execute once per OpenShift cluster
@@ -124,6 +124,18 @@ IMPORTANT: This step is required and only execute once per OpenShift cluster
 ----
 # Install the strimzi-crd sub-chart
 helm upgrade --install strimzi-crd amq-streams-chart/charts/strimzi-crd --namespace ${WORK_NAMESPACE}
+----
+
+*Progress Check:*
+* We should have the following charts installed
+[source,bash]
+----
+# command
+helm list
+# output
+NAME                            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
+strimzi-crd                     source-cluster  1               2021-12-21 17:28:11.37528 -0600 CST     deployed        strimzi-crd-1.0.0               1.8        
+user-workload-monitoring        source-cluster  1               2021-12-21 17:27:22.72043 -0600 CST     deployed        user-workload-monitoring-1.0.0  1.8        
 ----
 
 #### Deploy the cluster operator
@@ -138,6 +150,7 @@ helm upgrade --install cluster-operator amq-streams-chart/charts/cluster-operato
 * The output should look like below table
 [source,bash]
 ----
+# List pods and wait until cluster-operator pod is in a Running state.
 oc --namespace ${WORK_NAMESPACE} get pods
 # Output
 NAME                                        READY   STATUS    RESTARTS   AGE
@@ -153,19 +166,19 @@ strimzi-cluster-operator-7447d98d84-xcqdk   1/1     Running   0          2m1s
 helm list
 # output
 NAME                            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
-cluster-operator                source-cluster  1               2021-12-20 19:21:41.675028842 +0000 UTC deployed        cluster-operator-1.0.0          1.8        
-user-workload-monitoring        source-cluster  1               2021-12-20 19:43:49.740817957 +0000 UTC deployed        user-workload-monitoring-1.0.0  1.8          
+cluster-operator                source-cluster  1               2021-12-21 17:29:01.545584 -0600 CST    deployed        cluster-operator-1.0.0          1.8        
+strimzi-crd                     source-cluster  1               2021-12-21 17:28:11.37528 -0600 CST     deployed        strimzi-crd-1.0.0               1.8        
+user-workload-monitoring        source-cluster  1               2021-12-21 17:27:22.72043 -0600 CST     deployed        user-workload-monitoring-1.0.0  1.8                     
 ----
 
-#### Deploy Kafka its components
-** The cluster-operator must be deployed first
-** The kafka components are declared within a sub-chart named kafka-components.
+#### Deploy Kafka and related components
+** The cluster-operator must be deployed and running first
+** The kafka components are declared within a sub-chart named kafka.
 
 [source,bash]
 ----
 # Apply the kafka sub-chart to deploy kafka and its components
 helm upgrade --install strimzi-cluster amq-streams-chart/charts/kafka --namespace ${WORK_NAMESPACE}
-
 ----
 * After about 5min, the output should look like below table
 ** If you don't see below output, troubleshoot by:
@@ -196,9 +209,10 @@ strimzi-cluster-zookeeper-1                        1/1     Running   0          
 helm list
 # output
 NAME                            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
-cluster-operator                source-cluster  1               2021-12-20 19:21:41.675028842 +0000 UTC deployed        cluster-operator-1.0.0          1.8           
-strimzi-cluster                 source-cluster  5               2021-12-20 20:37:44.642093 -0600 CST    deployed        kafka-1.0.0                     1.8              
-user-workload-monitoring        source-cluster  1               2021-12-20 19:43:49.740817957 +0000 UTC deployed        user-workload-monitoring-1.0.0  1.8         
+cluster-operator                source-cluster  1               2021-12-21 17:29:01.545584 -0600 CST    deployed        cluster-operator-1.0.0          1.8        
+strimzi-cluster                 source-cluster  1               2021-12-21 17:30:11.545073 -0600 CST    deployed        kafka-1.0.0                     1.8        
+strimzi-crd                     source-cluster  1               2021-12-21 17:28:11.37528 -0600 CST     deployed        strimzi-crd-1.0.0               1.8        
+user-workload-monitoring        source-cluster  1               2021-12-21 17:27:22.72043 -0600 CST     deployed        user-workload-monitoring-1.0.0  1.8     
 ----
 
 #### Deploy monitoring resources for dashboards and alerts
@@ -208,10 +222,12 @@ user-workload-monitoring        source-cluster  1               2021-12-20 19:43
 * User workload monitoring must be enabled before attempting to deploy the monitoring resources for the strimzi cluster. 
 * I have added the workload monitoring enabler subchart.
 * In `amq-streams-chart/charts/strimzi-monitoring/examples/metrics/grafana-dashboards/`, replace all instances of `${DS_PROMETHEUS}` by `Prometheus`.
+* In `amq-streams-chart/charts/strimzi-monitoring/values.yaml`, update `hostDomain` to your cluster domain name.
+* in `examples/metrics/grafana-dashboards`, replace all instances of ${DS_PROMETHEUS} by the data source name: Prometheus
+** This action has already been performed for this repo.
 
 [source,bash]
 ----
-# Replace ${DS_PROMETHEUS} by the data source name: Prometheus
 # Apply the strimzi-monitoring sub-chart
 helm upgrade --install strimzi-monitoring amq-streams-chart/charts/strimzi-monitoring --namespace ${WORK_NAMESPACE}
 ----
@@ -237,8 +253,11 @@ strimzi-cluster-zookeeper-1                        1/1     Running   0          
 * Also look at the grafana po logs to confirm there are no errors;
 ** all log records should show `lvl=info` or `lvl=warn`; otherwise you need to resolve whatever error the logs print.
 +
-[source,text]
+[source,bash]
 ----
+# tail the grafana deployment logs
+$ oc logs deployment/grafana
+# output
 t=2021-12-20T23:22:20+0000 lvl=info msg="New state change" logger=alerting.resultHandler ruleId=5 newState=no_data prev state=unknown
 t=2021-12-20T23:22:21+0000 lvl=warn msg="Could not render image, no image renderer found/installed. For image rendering support please install the grafana-image-renderer plugin. Read more at https://grafana.com/docs/grafana/latest/administration/image_rendering/" logger=rendering
 t=2021-12-20T23:22:21+0000 lvl=info msg="Executing slack notification" logger=alerting.notifier.slack ruleId=5 notification=Slack
@@ -252,6 +271,10 @@ t=2021-12-20T23:22:40+0000 lvl=info msg="New state change" logger=alerting.resul
 +
 * After verifying there are no errors in the grafana pod logs, grab the *grafana* route and open it via a browser.
 ** Default username and password is `admin`; you may change it by passing values during helm install command.
+[source,bash]
+----
+oc get route --namespace ${WORK_NAMESPACE}
+----
 * Below represent what the Kafka dashboard might look like.
 image::images/grafana-kafka.png[grafana-kafka]
 
@@ -265,10 +288,11 @@ Now that we've setup our source kafka cluster, let's deploy some sample apps.
 helm list
 # output
 NAME                            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
-cluster-operator                source-cluster  1               2021-12-20 19:21:41.675028842 +0000 UTC deployed        cluster-operator-1.0.0          1.8              
-strimzi-cluster                 source-cluster  5               2021-12-20 20:37:44.642093 -0600 CST    deployed        kafka-1.0.0                     1.8        
-strimzi-monitoring              source-cluster  14              2021-12-20 20:23:51.813166 -0600 CST    deployed        strimzi-monitoring-1.0.0        1.8        
-user-workload-monitoring        source-cluster  1               2021-12-20 19:43:49.740817957 +0000 UTC deployed        user-workload-monitoring-1.0.0  1.8    
+cluster-operator                source-cluster  1               2021-12-21 17:29:01.545584 -0600 CST    deployed        cluster-operator-1.0.0          1.8        
+strimzi-cluster                 source-cluster  1               2021-12-21 17:30:11.545073 -0600 CST    deployed        kafka-1.0.0                     1.8        
+strimzi-crd                     source-cluster  1               2021-12-21 17:28:11.37528 -0600 CST     deployed        strimzi-crd-1.0.0               1.8        
+strimzi-monitoring              source-cluster  2               2021-12-21 17:45:34.776431 -0600 CST    deployed        strimzi-monitoring-1.0.0        1.8        
+user-workload-monitoring        source-cluster  1               2021-12-21 17:27:22.72043 -0600 CST     deployed        user-workload-monitoring-1.0.0  1.8     
 ----
 
 #### Deploying sample apps to test our cluster
@@ -324,11 +348,12 @@ image::images/grafana-kafka-exporter.png[grafana-kafka-exporter]
 helm list
 # output
 NAME                            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
-cluster-operator                source-cluster  1               2021-12-20 19:21:41.675028842 +0000 UTC deployed        cluster-operator-1.0.0          1.8            
-producers                       source-cluster  4               2021-12-20 21:04:16.485084 -0600 CST    deployed        producers-1.0.0                 1.8        
-strimzi-cluster                 source-cluster  5               2021-12-20 20:37:44.642093 -0600 CST    deployed        kafka-1.0.0                     1.8        
-strimzi-monitoring              source-cluster  14              2021-12-20 20:23:51.813166 -0600 CST    deployed        strimzi-monitoring-1.0.0        1.8        
-user-workload-monitoring        source-cluster  1               2021-12-20 19:43:49.740817957 +0000 UTC deployed        user-workload-monitoring-1.0.0  1.8   
+cluster-operator                source-cluster  1               2021-12-21 17:29:01.545584 -0600 CST    deployed        cluster-operator-1.0.0          1.8        
+producers                       source-cluster  1               2021-12-21 17:47:28.022283 -0600 CST    deployed        producers-1.0.0                 1.8        
+strimzi-cluster                 source-cluster  1               2021-12-21 17:30:11.545073 -0600 CST    deployed        kafka-1.0.0                     1.8        
+strimzi-crd                     source-cluster  1               2021-12-21 17:28:11.37528 -0600 CST     deployed        strimzi-crd-1.0.0               1.8        
+strimzi-monitoring              source-cluster  2               2021-12-21 17:45:34.776431 -0600 CST    deployed        strimzi-monitoring-1.0.0        1.8        
+user-workload-monitoring        source-cluster  1               2021-12-21 17:27:22.72043 -0600 CST     deployed        user-workload-monitoring-1.0.0  1.8    
 ----
 +
 . Deploy the consumers
@@ -365,12 +390,13 @@ image::images/grafana-kafka-exporter-cg.png[grafana-kafka-exporter]
 helm list
 # output
 NAME                            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
-cluster-operator                source-cluster  1               2021-12-20 19:21:41.675028842 +0000 UTC deployed        cluster-operator-1.0.0          1.8        
-consumers                       source-cluster  1               2021-12-20 21:28:44.018332 -0600 CST    deployed        consumers-1.0.0                 1.8        
-producers                       source-cluster  4               2021-12-20 21:04:16.485084 -0600 CST    deployed        producers-1.0.0                 1.8        
-strimzi-cluster                 source-cluster  5               2021-12-20 20:37:44.642093 -0600 CST    deployed        kafka-1.0.0                     1.8        
-strimzi-monitoring              source-cluster  14              2021-12-20 20:23:51.813166 -0600 CST    deployed        strimzi-monitoring-1.0.0        1.8        
-user-workload-monitoring        source-cluster  1               2021-12-20 19:43:49.740817957 +0000 UTC deployed        user-workload-monitoring-1.0.0  1.8    
+cluster-operator                source-cluster  1               2021-12-21 17:29:01.545584 -0600 CST    deployed        cluster-operator-1.0.0          1.8        
+consumers                       source-cluster  1               2021-12-21 17:48:37.360694 -0600 CST    deployed        consumers-1.0.0                 1.8        
+producers                       source-cluster  1               2021-12-21 17:47:28.022283 -0600 CST    deployed        producers-1.0.0                 1.8        
+strimzi-cluster                 source-cluster  1               2021-12-21 17:30:11.545073 -0600 CST    deployed        kafka-1.0.0                     1.8        
+strimzi-crd                     source-cluster  1               2021-12-21 17:28:11.37528 -0600 CST     deployed        strimzi-crd-1.0.0               1.8        
+strimzi-monitoring              source-cluster  2               2021-12-21 17:45:34.776431 -0600 CST    deployed        strimzi-monitoring-1.0.0        1.8        
+user-workload-monitoring        source-cluster  1               2021-12-21 17:27:22.72043 -0600 CST     deployed        user-workload-monitoring-1.0.0  1.8   
 ----
 
 ### Part2: Setting up the target kafka cluster
@@ -385,7 +411,7 @@ export WORK_NAMESPACE="target-cluster"
 oc project ${WORK_NAMESPACE}
 ----
 
-#### Deploying all the remaining components
+#### Deploying cluster-operator, kafka, strimzi-monitoring
 
 Follow the same steps in *Part1* to setup the target-cluster:
 * The strimzi-crd sub-chart is not required here; its installation is cluster-wide.
@@ -394,8 +420,9 @@ Follow the same steps in *Part1* to setup the target-cluster:
 +
 [source,bash]
 ----
+# Apply the cluster-operator chart
 helm upgrade --install cluster-operator amq-streams-chart/charts/cluster-operator --namespace ${WORK_NAMESPACE}
-# check cluster-operator pod is running
+# check and wait until cluster-operator pod is running
 oc --namespace "${WORK_NAMESPACE}" get pods
 # output
 NAME                                        READY   STATUS    RESTARTS   AGE
@@ -406,8 +433,9 @@ strimzi-cluster-operator-7447d98d84-7cf2b   1/1     Running   0          66s
 +
 [source,bash]
 ----
+# Apply the kafka chart
 helm upgrade --install kafka amq-streams-chart/charts/kafka --namespace ${WORK_NAMESPACE}
-# check cluster-operator pod is running
+# check and wait until all kafka related pods are running
 oc --namespace "${WORK_NAMESPACE}" get pods
 # output
 NAME                                              READY   STATUS    RESTARTS   AGE
@@ -423,20 +451,25 @@ strimzi-cluster-zookeeper-1                       1/1     Running   0          1
 +
 . Apply the strimzi-monitoring sub-chart
 +
+*Prerequisites:*
++
+* In `amq-streams-chart/charts/strimzi-monitoring/values.yaml`, update `hostDomain` to your cluster domain name.
++
 [source,bash]
 ----
+# Apply the helm chart
 helm upgrade --install strimzi-monitoring amq-streams-chart/charts/strimzi-monitoring --namespace ${WORK_NAMESPACE}
 # grab grafana route to access monitoring dashboard
 oc --namespace ${WORK_NAMESPACE} get route
 # output
 NAME                                       HOST/PORT                                                                                                PATH   SERVICES                                   PORT 
-grafana                                    grafana-target-cluster.apps.cluster-ceda.ceda.sandbox1278.opentlc.com                                           grafana                                    grafana  
-strimzi-cluster-kafka-external-0           strimzi-cluster-kafka-external-0-target-cluster.apps.cluster-ceda.ceda.sandbox1278.opentlc.com                  strimzi-cluster-kafka-external-0           9093
-strimzi-cluster-kafka-external-1           strimzi-cluster-kafka-external-1-target-cluster.apps.cluster-ceda.ceda.sandbox1278.opentlc.com                  strimzi-cluster-kafka-external-1           9093
+grafana                                    grafana-target-cluster.apps.cluster-ceda.ceda.sandbox1278.opentlc.com                                           grafana  
+strimzi-cluster-kafka-external-0           strimzi-cluster-kafka-external-0-target-cluster.apps.cluster-ceda.ceda.sandbox1278.opentlc.com                  strimzi-cluster-kafka-external-0
+strimzi-cluster-kafka-external-1           strimzi-cluster-kafka-external-1-target-cluster.apps.cluster-ceda.ceda.sandbox1278.opentlc.com                  strimzi-cluster-kafka-external-1
 strimzi-cluster-kafka-external-bootstrap   strimzi-cluster-kafka-external-bootstrap-target-cluster.apps.cluster-ceda.ceda.sandbox1278.opentlc.com  
 ----
 +
-* Default username and password is `admin`.
+* `admin` is the default username and password.
 * If all goes as expected, you should see below diagram
 image:images/kafka-target-cluster.png[grafana target cluster]
 
@@ -466,8 +499,8 @@ image:images/mirror-maker2.png[mirror-maker-2 one way replication]
 
 IMPORTANT: MirrorMaker2 should be deployed alongside a running target Kafka cluster.
 
-* This MM2 instance is setup in an active/passive mod; meaning mirrored data flows in one direction: source to target.
-* The MM2 instance is also setup to begin replication from the earliest message and work its way towards the latest message.
+* This MM2 instance is setup in an *active/passive* mode; meaning mirrored data flows in one direction, source to target or left to right.
+* The MM2 instance is also setup to begin replication from the *_earliest_* message and work its way to the *_latest_* message.
 
 [source,bash]
 ----
@@ -475,8 +508,36 @@ IMPORTANT: MirrorMaker2 should be deployed alongside a running target Kafka clus
 helm upgrade --install mirror-maker2 mirror-maker2/ --namespace ${WORK_NAMESPACE}
 # list the pods to confirm there is a mirrormaker2 pod
 oc --namespace ${WORK_NAMESPACE} get pods
-
+# output
+NAME                                                 READY   STATUS    RESTARTS   AGE
+grafana-5c4c86c478-dkcd4                             1/1     Running   0          5m19s
+strimzi-cluster-cruise-control-84c5985b85-pdp8z      2/2     Running   0          45m
+strimzi-cluster-entity-operator-b76d478c8-6tl8b      3/3     Running   0          47m
+strimzi-cluster-kafka-0                              1/1     Running   0          48m
+strimzi-cluster-kafka-1                              1/1     Running   0          48m
+strimzi-cluster-kafka-exporter-dccf6c7-57lkl         1/1     Running   0          44m
+strimzi-cluster-operator-7447d98d84-c4v5n            1/1     Running   0          50m
+strimzi-cluster-zookeeper-0                          1/1     Running   0          49m
+strimzi-cluster-zookeeper-1                          1/1     Running   0          49m
+strimzi-mirrormaker2-mirrormaker2-5f894fbbbc-h5szc   1/1     Running   0          49s
 ----
+
+When MM2 is successful setup, the MirrorMaker2 dashboard in grafana will look like below:app-name: 
+image::imges/grafana-mirror-maker2.png[grafana-mirrormaker2]
+
+### Conclusion
+
+In this guide we've gone through the steps of:
+
+* enabling user-workload monitoring
+* creating namespaces
+* creating CRDs to ready OpenShift to accept AMQ Streams resources
+* installing the AMQ Streams cluster operator
+* setting up the Kafka cluster alongside we also added KafkaExporter, KafkaCruiseControl, KafkaRebalance, KafkaUserOperator, KafkaTopicsOperator resources
+* installed components needed to monitor a strimzi cluster -- PodMonitor, Grafana (dashboards and alerts), Prometheus, Metrics definition config maps
+* setting up some sample producer and consumer applications
+* setting up MirrorMaker2 for cluster mirroring needs
+* packaging multiple helm charts into one.
 
 
 

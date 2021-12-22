@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kafka
-description: A Helm chart for installing Kafka and its components.
+description: A Helm chart for installing Kafka and related components.
 
 # A chart can be either an 'application' or a 'library' chart.
 #

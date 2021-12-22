@@ -5,7 +5,7 @@ grafana:
   adminUsername: admin
   adminPassword: admin
   hostname: grafana
-  hostDomain: ".apps.cluster-ceda.ceda.sandbox1278.opentlc.com"
+  hostDomain: ".apps.cluster-2d54.2d54.sandbox942.opentlc.com"
   clientId: my-oauth-clientId
   clientSecret: my-oauth-clientSecret
   scopes: "openid profile email"
