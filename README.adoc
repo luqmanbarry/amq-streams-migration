@@ -1,4 +1,4 @@
-# Migrating AMQ Streams from Openshift 3.11 to 4.7
+# Migrating AMQ Streams cluster
 
 [quote, AMQS Product Docs]
 AMQ Streams simplifies the process of running Apache Kafka in an OpenShift cluster.
@@ -14,7 +14,7 @@ This guide uses two namespaces within the same Openshift cluster to mimic cross 
 
 ### Architecture
 
-image::images/architecture.png[setup-architecture]
+image::images/architecture.png[fallback=images/architecture.png]
 
 ### Components, CRDs deployed
 
@@ -299,7 +299,7 @@ oc get route --namespace ${WORK_NAMESPACE}
 +
 * Below represent what the Kafka dashboard might look like.
 
-image::images/grafana-kafka.png[grafana-kafka]
+image::images/grafana-kafka.png[fallback=images/grafana-kafka.png]
 
 Now that we've setup our source kafka cluster, let's deploy some sample apps.
 
@@ -361,7 +361,7 @@ producer-low-5f5c466884-rzdc4    1/1     Running   0          20m
 +
 Grafana(Kafka Exporter Dashboard) as data is getting ingested.
 +
-image::images/grafana-kafka-exporter.png[grafana-kafka-exporter]
+image::images/grafana-kafka-exporter.png[fallback=images/grafana-kafka-exporter.png]
 +
 *Progress Check:*
 +
@@ -403,7 +403,7 @@ Grafana(Kafka Exporter Dashboard) as data is ingested and consumed.
 +
 ** Note the `Consumer Group Lag` panel, there you can see the consumer groups our consumers apps have using.
 +
-image::images/grafana-kafka-exporter-cg.png[grafana-kafka-exporter]
+image::images/grafana-kafka-exporter-cg.png[fallback=images/grafana-kafka-exporter-cg.png]
 +
 *Progress Check:*
 +
@@ -577,9 +577,9 @@ strimzi-mirrormaker2-mirrormaker2-5f894fbbbc-h5szc   1/1     Running   0        
 ----
 
 When MM2 is successful setup, the MirrorMaker2 dashboard in grafana will look like below:app-name: 
-image::imges/grafana-mirror-maker2.png[grafana-mirrormaker2]
+image::images/grafana-mirror-maker2.png[fallback=images/grafana-mirror-maker2.png]
 
-### Cleanup -- Optional
+### Part5: Cleanup -- Optional
 
 Execute the following commands to remove all deployed resources
 
