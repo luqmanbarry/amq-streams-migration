@@ -89,7 +89,7 @@ This plan might be per use case basis, but the simplest form is as follow:
 
 In this article we have explained the strategies and plans involved in migration an AMQ Streams cluster in _Active/Passive_ mode between two Openshift deployments.
 
-include::IMPLEMENTATION.adoc[technical implemention]
+include::technical-implementation.adoc[technical implemention]
 
 
 
