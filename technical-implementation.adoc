@@ -1,4 +1,3 @@
-# Technical Implementation
 
 
 In the upcoming sections, I will show how to migrate an AMQ Stream cluster between OCP environments(Example: OCP3.11 to OCP4.8) using MirrorMaker2; a Kafka component used to replicate data between two or more active Kafka clusters, within or across data centers. 
