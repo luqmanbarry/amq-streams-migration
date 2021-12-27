@@ -10,9 +10,9 @@ from Openshift 3.11 to Openshift 4.7; along with that we also migrated over 100s
 
 ## Objectives
 
-In simple terms, there was a need to migrate a pre-existing AMQ Streams(v1.4) cluster from Openshift 3.11 to AMQ Streams(v1.7) on Openshift 4.7.
+In condensed terms, there was a need to migrate a pre-existing AMQ Streams(v1.4) cluster from Openshift 3.11 to AMQ Streams(v1.7) on Openshift 4.7.
 
-These are the requirements:
+These are the primary goals:
 
 * minimal downtime
 * minimal to no data loss
@@ -76,7 +76,7 @@ IMPORTANT: MirrorMaker2 must be running ahead of cut over time, this can be days
 
 ## Rollback Plan
 
-This plan might be per use case basis, but the simplest form is as follow:
+This plan might be per use case basis, but the distilled form is as follow:
 
 . Switch data ingestion valve to source cluster
 . On target cluster
