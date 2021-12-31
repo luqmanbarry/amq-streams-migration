@@ -4,8 +4,8 @@
 AMQ Streams simplifies the process of running Apache Kafka in an OpenShift cluster.
 
 
-The purpose of this article is to discuss a lessons learned about a migration project with a client; we helped a client migrate an AMQ Streams cluster
-from Openshift 3.11 to Openshift 4.7; along with that we also migrated over 100s kafka producers and consumers applications to the new cluster.
+The purpose of this article is to discuss lessons learned from a migration project with a client; we helped them migrate an AMQ Streams cluster
+from Openshift 3.11 to 4.7; along with that we also migrated over 100s Java event-driven microservices to the new cluster.
 
 
 ## Objectives
@@ -85,6 +85,14 @@ This plan might be per use case basis, but the distilled form is as follow:
 . On source cluster
 * turn on producer/upstream apps
 * turn on consumer apps.
+
+## Issues faced and how we solved them
+
+### MirrorMaker2 replication strategy
+
+### Pods killed due to Out Of Memory in new cluster
+
+### Producers, Consumers start/stop order to enforce ordered message flow to downstream apps
 
 ## Summary
 
