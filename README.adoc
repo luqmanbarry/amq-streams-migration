@@ -1,4 +1,4 @@
-# Deploying, monitoring, and migrating AMQS Streams
+# Deploying, monitoring, and migrating AMQ Streams
 
 [quote, AMQ Streams Product docs]
 AMQ Streams simplifies the process of running Apache Kafka in an OpenShift cluster.
@@ -10,7 +10,7 @@ from Openshift 3.11 to 4.7; along with that we also migrated over 100s Java even
 
 ## Objectives
 
-In condensed terms, there was a need to migrate a pre-existing AMQ Streams(v1.4) cluster from Openshift 3.11 to AMQ Streams(v1.7) on Openshift 4.7.
+In condensed terms, there was a need to migrate a pre-existing AMQ Streams(v1.4) cluster from OCP 3.11 to AMQ Streams(v1.7) on OCP 4.7.
 
 These are the primary goals:
 
