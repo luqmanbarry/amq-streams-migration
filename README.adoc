@@ -70,9 +70,9 @@ IMPORTANT: MirrorMaker2 must be running ahead of cut over time, this can be days
 . Spin up downstream apps.
 . Validate cut over process is successful
 * Look at data ingestion volume; should be nearly or exactly the same;
-* If you apps are writing to data stores, validate you're getting similar ingestion or retrieval traffic patterns.
+* If your apps are writing to data stores, validate you're getting similar ingestion or read traffic patterns.
 * Validate apps logs and that there are no errors or at least abnormal messages appearing in the logs.
-* Watch for resource consumption spikes and network traffic patterns in the cluster
+* Watch for resource consumption spikes and network traffic patterns in the cluster.
 
 ## Rollback Plan
 
