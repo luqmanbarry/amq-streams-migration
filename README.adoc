@@ -95,7 +95,7 @@ In simple terms when mirroring an existing cluster:
 * set `mirrors.sourceConnector.config.auto.offset.reset: latest`
 ** when replicating historical data is not of concerns
 *** an example use case might be when MM2 is set up at the same time as the AMQ Streams cluster
-*** or for some requirement, you just want to begin mirroring at the end of topic
+*** or for some requirement, you just want to begin mirroring at the end of topic; no concerns for data loss.
 
 * set `mirrors[].sourceConnector.config.auto.offset.reset: earliest`
 ** when replicating historical data is a requirement
