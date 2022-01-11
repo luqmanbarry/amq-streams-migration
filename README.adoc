@@ -100,8 +100,8 @@ In simple terms when mirroring an existing cluster:
 * set `mirrors[].sourceConnector.config.auto.offset.reset: earliest`
 ** when replicating historical data is a requirement
 ** when you want all available historical data in the source cluster copied over to the target cluster
-** an example use case might be when migrating an existing AMQ Streams cluster to another with _*minimal or zero data loss*_.
-** or you want to setup and _*active/passive*_ setup whereby the passive cluster is installed at a moment when the active cluster have already seen data ingested.
+** an example use case might be when migrating an existing AMQ Streams cluster to another with _minimal or zero data loss_.
+** or you want to setup and _active/passive_ setup whereby the passive cluster is installed at a moment when the active cluster have already seen data ingested.
 
 auto.offset.reset
 What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server (e.g. because that data has been deleted):
@@ -111,11 +111,11 @@ latest: automatically reset the offset to the latest offset
 
 ### Pods killed due to Out Of Memory in new cluster
 
-Pods were being terminated in the target cluster, at first we thought it was the JVM eating up all the pod memory. We implemented JVM boundaries whereby we _*-Xms*_ and _*Xmx*_ values as argument of the run command of the container image; `java -jar` in this case. Despite this change we still got OOMKilled errors, pod were being killed.
+Pods were being terminated in the target cluster, at first we thought it was the JVM eating up all the pod memory. We implemented JVM boundaries whereby we _-Xms_ and _Xmx_ values as argument of the run command of the container image; `java -jar` in this case. Despite this change we still got OOMKilled errors, pod were being killed.
 
 * link::https://docs.openshift.com/container-platform/4.8/nodes/clusters/nodes-cluster-resource-configure.html[Click here for more on cluster memory configuration]
 
-The next level of our troubleshooting, which by the way caused some head scratches for few days, is to increase the PID limit of the nodes in the RHOCP cluster. This issue was due to some of the apps creating more processes in their respective containers than the default PID limit set at *1024*; hence _*OOMKilled*_ error after the pod runs for few hours despite having an _*HorizontalPodAutoscaler*_ resource monitoring this particular application for scaling needs.
+The next level of our troubleshooting, which by the way caused some head scratches for few days, is to increase the PID limit of the nodes in the RHOCP cluster. This issue was due to some of the apps creating more processes in their respective containers than the default PID limit set at *1024*; hence _OOMKilled_ error after the pod runs for few hours despite having an _HorizontalPodAutoscaler_ resource monitoring this particular application for scaling needs.
 
 * link::https://kubernetes.io/docs/concepts/policy/pid-limiting/[Kubernetes docs on PIDs limit]
 * link::https://computingforgeeks.com/change-pids-limit-value-in-openshift/[Change PIDs limit in Openshift]
