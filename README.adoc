@@ -107,7 +107,7 @@ In simple terms when mirroring an existing cluster:
 
 ### Pods killed due to Out Of Memory in new cluster
 
-Pods were being terminated in the target cluster, at first we thought it was the JVM eating up all the pod memory. We implemented JVM boundaries whereby we _-Xms_ and _Xmx_ values as argument of the run command of the container image; `java -jar` in this case. Despite this change we still got OOMKilled errors, pod were being killed.
+Pods were being terminated in the target cluster, at first we thought it was the JVM eating up all the pod memory. We implemented JVM boundaries whereby we _-Xms_ and _Xmx_ values as arguments for the _ENTRYPOINT_ command of the container image; `java -jar` in this case. Despite this change we still got OOMKilled errors, pods were being killed.
 
 * https://docs.openshift.com/container-platform/4.8/nodes/clusters/nodes-cluster-resource-configure.html[Click here for more on cluster memory configuration]
 
