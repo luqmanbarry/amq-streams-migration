@@ -103,11 +103,7 @@ In simple terms when mirroring an existing cluster:
 ** an example use case might be when migrating an existing AMQ Streams cluster to another with _minimal or zero data loss_.
 ** or you want to setup and _active/passive_ setup whereby the passive cluster is installed at a moment when the active cluster have already seen data ingested.
 
-auto.offset.reset
-What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server (e.g. because that data has been deleted):
-
-earliest: automatically reset the offset to the earliest offset
-latest: automatically reset the offset to the latest offset
+* link:: https://kafka.apache.org/documentation/#consumerconfigs_auto.offset.reset[Red the Kafka docs for more]
 
 ### Pods killed due to Out Of Memory in new cluster
 
