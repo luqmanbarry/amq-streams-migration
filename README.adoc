@@ -103,7 +103,7 @@ In simple terms when mirroring an existing cluster:
 ** an example use case might be when migrating an existing AMQ Streams cluster to another with _minimal or zero data loss_.
 ** or you want to setup and _active/passive_ setup whereby the passive cluster is installed at a moment when the active cluster have already seen data ingested.
 
-* [Red the Kafka docs for more]
+* https://kafka.apache.org/documentation/#consumerconfigs_auto.offset.reset[Red the Kafka docs for more]
 
 ### Pods killed due to Out Of Memory in new cluster
 
