@@ -79,12 +79,19 @@ IMPORTANT: MirrorMaker2 must be running ahead of cut over time, this can be days
 This plan might be per use case basis, but the distilled form is as follow:
 
 . Switch data ingestion valve to source cluster
-. On target cluster
-* spin down producer/upstream apps on target cluster
-* let consumer apps drain their respective topics and shut them down.
 . On source cluster
+* spin down producer/upstream apps
+* let consumer apps drain their respective topics and shut them down.
+. On target cluster
 * turn on producer/upstream apps
 * turn on consumer apps.
+. Validate data ingestion traffic patterns matches original state of source cluster.
+* you may use the monitoring dashboards for this; for instance you may look at:
+** incoming and outgoing messages per second
+** data ingestion rate in the data stores if any
+** application health
+** bytes in/out per second, and much more.
+** consumer groups and their lags
 
 ## Issues faced and how we solved them
 
