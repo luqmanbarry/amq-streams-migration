@@ -85,7 +85,13 @@ This plan might be per use case basis, but the distilled form is as follow:
 . On target cluster
 * turn on producer/upstream apps
 * turn on consumer apps.
-. Validate data ingestion traffic patterns matches original state
+. Validate data ingestion traffic patterns matches original state of source cluster.
+* you may use the monitoring dashboards for this; for instance you may look at:
+** incoming and outgoing messages per second
+** data ingestion rate in the data stores if any
+** application health
+** bytes in/out per second, and much more.
+** consumer groups and their lags
 
 ## Issues faced and how we solved them
 
