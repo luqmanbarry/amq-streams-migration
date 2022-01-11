@@ -90,8 +90,8 @@ This plan might be per use case basis, but the distilled form is as follow:
 ** incoming and outgoing messages per second
 ** data ingestion rate in the data stores if any
 ** application health
-** bytes in/out per second, and much more.
 ** consumer groups and their lags
+** bytes in/out per second, and much more.
 
 ## Issues faced and how we solved them
 
