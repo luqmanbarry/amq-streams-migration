@@ -113,8 +113,8 @@ Pods were being terminated in the target cluster, at first we thought it was the
 
 The next level of our troubleshooting, which by the way caused some head scratches for few days, is to increase the PID limit of the nodes in the RHOCP cluster. This issue was due to some of the apps creating more processes in their respective containers than the default PID limit set at *1024*; hence _OOMKilled_ error after the pod runs for few hours despite having an _HorizontalPodAutoscaler_ resource monitoring this particular application for scaling needs.
 
-* https://kubernetes.io/docs/concepts/policy/pid-limiting/[Kubernetes docs on PIDs limit]
-* https://computingforgeeks.com/change-pids-limit-value-in-openshift/[Change PIDs limit in Openshift]
+* https://kubernetes.io/docs/concepts/policy/pid-limiting/[Read on Kubernetes docs about PIDs limit]
+* https://computingforgeeks.com/change-pids-limit-value-in-openshift/[Click here for how to change PIDs limit in Openshift]
 
 
 ## Technical Implementation
