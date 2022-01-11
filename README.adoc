@@ -118,11 +118,12 @@ The next level of our troubleshooting, which by the way caused some head scratch
 
 
 ## Technical Implementation
-
++
 include::technical-implementation.adoc[]
 
-## AMQ-Streams commands Cheat-Sheet
 
+## AMQ-Streams commands Cheat-Sheet
++
 include::AMQ-Streams-command-cheat-sheet.pdf[]
 
 ## Summary
