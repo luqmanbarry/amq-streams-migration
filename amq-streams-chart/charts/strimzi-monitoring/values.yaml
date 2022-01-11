@@ -24,8 +24,8 @@ grafana:
   notifiers:
     slack:
       username: username-here
-      url: https://hooks.slack.com/services/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
-      token: VERYs3c4reToken
+      url: https://hooks.slack.com/services/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R
+      token: VERYsMyTokenToken
       recipient: team-channel
     teams:
       url: https://your-teams-webhook/4589727885/
