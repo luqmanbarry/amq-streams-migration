@@ -88,7 +88,7 @@ This plan might be per use case basis, but the distilled form is as follow:
 
 ## Issues faced and how we solved them
 
-### MirrorMaker2 replication strategy
+### 1. MirrorMaker2 replication strategy
 
 In simple terms when mirroring an existing cluster:
 
@@ -105,7 +105,7 @@ In simple terms when mirroring an existing cluster:
 
 * https://kafka.apache.org/documentation/#consumerconfigs_auto.offset.reset[Red the Kafka docs for more]
 
-### Pods killed due to Out Of Memory in new cluster
+### 2. Pods killed due to Out Of Memory in new cluster
 
 Pods were being terminated in the target cluster, at first we thought it was the JVM eating up all the pod memory. We implemented JVM boundaries whereby we _-Xms_ and _Xmx_ values as arguments for the _ENTRYPOINT_ command of the container image; `java -jar` in this case. Despite this change we still got OOMKilled errors, pods were being killed.
 
