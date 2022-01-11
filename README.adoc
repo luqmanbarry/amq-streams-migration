@@ -101,6 +101,11 @@ In this article we have explained the strategies and plans involved in migration
 == Technical Implementation
 include::technical-implementation.adoc[Technical Implementation]
 
+== AMQ Streams Command Cheat Sheet
+,===
+include::AMQ-Streams-command-cheat-sheet.pdf[pdf]
+,===
+
 
 
 
