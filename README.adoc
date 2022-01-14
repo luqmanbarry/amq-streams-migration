@@ -134,9 +134,9 @@ include::AMQ-Streams-command-cheat-sheet.pdf[]
 
 ## Summary
 
-In this article we have explained the strategies and plans involved in migration an AMQ Streams cluster in _Active/Passive_ mode between two Openshift deployments.
+In this article we have explained the strategies and plans involved in migration of an AMQ Streams cluster in an _Active/Passive_ setting between two RHOCP installations.
 
-Happy coding!
+Happy Streaming!
 
 
 
