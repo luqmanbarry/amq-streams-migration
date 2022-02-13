@@ -6,7 +6,12 @@ _AMQ Streams_ simplifies the process of running Apache Kafka in an OpenShift clu
 
 *Note*: 
 
-All references of _source cluster_, _target cluster_ implicitly mean *AMQ Streams v1.4*, *AMQ Streams v1.7* respectively; unless when otherwise explicitly pointed out. I have made an attempt to define certain commonly utilized terms in the *Glossary* section.
+All references of _source cluster_, _target cluster_ implicitly mean *AMQ Streams v1.4*, *AMQ Streams v1.7* respectively; unless when otherwise explicitly pointed out. I have made an attempt to define certain commonly utilized terms in the *Glossary* section. 
+
+Furthermore, the post assumes the reader has some basic understanding of Apache kafka.
+
+There is a Kafka CLI command cheat sheet added towards the end of the article; all credits go to the team who put it together; Chapeau a vous.
+
 
 ## Abstract
 
