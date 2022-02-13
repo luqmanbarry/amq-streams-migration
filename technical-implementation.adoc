@@ -36,12 +36,14 @@ We will be deploying AMQ Streams v1.8 for this guide.
 
 This guide will utilize a 2 nodes Openshift 4.8 cluster.
 
-IMPORTANT: You need _cluster-admin_ role on the cluster to execute most of the tasks described in this guide.
+IMPORTANT: 
+
+You need _cluster-admin_ role on the cluster to execute most of the tasks described in this guide.
 
 ### Cluster info, tools used
 
 * 2 nodes OpenShift 4.8 Cluster
-** The ideal setup should be at least 3 worker nodes.
+** The ideal setup should be at least three worker nodes.
 * kubernetes v1.21.0
 * oc v4.8.2
 * AMQ Streams v1.8

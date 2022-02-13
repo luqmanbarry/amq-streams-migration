@@ -1,96 +1,135 @@
-# Deploying, monitoring, and migrating AMQ Streams
+# Deploying, monitoring, and migrating _AMQ Streams_
 
-[quote, AMQ Streams Product docs]
-AMQ Streams simplifies the process of running Apache Kafka in an OpenShift cluster.
-
-
-The purpose of this article is to discuss lessons learned from a migration project with a client; we helped them migrate an AMQ Streams cluster
-from Openshift 3.11 to 4.7; along with that we also migrated over 100s Java event-driven microservices to the new cluster.
+[quote, _AMQ Streams_ Product docs]
+_AMQ Streams_ simplifies the process of running Apache Kafka in an OpenShift cluster.
 
 
-## Objectives
+*Note*: 
 
-In condensed terms, there was a need to migrate a pre-existing AMQ Streams(v1.4) cluster from OCP 3.11 to AMQ Streams(v1.7) on OCP 4.7.
+All references of _source cluster_, _target cluster_ implicitly mean *AMQ Streams v1.4*, *AMQ Streams v1.7* respectively; unless when otherwise explicitly pointed out. I have made an attempt to define certain commonly utilized terms in the *Glossary* section.
+
+## Abstract
+
+This guide attempts to discuss lessons learned from a migration project for a large freight company. We helped migrate an _AMQ Streams_ cluster from OpenShift 3.11 to 4.7; additionally, we also migrated over 100s Java event-driven micro-services to the new cluster(AMQ Streams V1.7).
+
+In the section titled *Technical Implementation*, I will show how to migrate an AMQ Stream cluster between OpenShift environments(Example: OCP3.11 to OCP4.8) using MirrorMaker2; a Kafka component used to mirror data between two or more active Kafka clusters, within or across Kubernetes clusters. 
+
+We will begin with an overview of the two clusters(kafka-source and kafka-target), the components deployed, then lay down steps to deploy AMQ Stream v1.8, Prometheus(metrics collection), and Grafana(Dashboard, and Alerts). All these components are set up via a fleet of helm charts with the possibility of selectively installing specific resources(amqs, mirrormaker, grafana).
+
+
+## Migration Goals
+
+
+In condensed terms, there was a need to migrate a pre-existing _AMQ Streams_(v1.4) cluster from OpenShift(v3.11) to _AMQ Streams_(v1.7) on OpenShift(v4.7).
 
 These are the primary goals:
 
 * minimal downtime
 * minimal to no data loss
-* no message duplication
-* new cluster should be able to handle more throughput that previous cluster
-* monitor and alert on certain kafka cluster and applications(producers, consumers) states and behaviors.
+* zero message duplication
+* new cluster(AMQ Streams V1.7) should be capable to handle more throughput than the former
+* monitor and alert on some Kafka cluster and applications states and behaviors.
 
 ## Migration Strategy
 
-To successfully carry out this migration, we adopted the _Think-Do-Check_ mindset; in other words we used the concepts of _Dry-Run_ to come up with repeatable and predictable migration strategy.
+To successfully carry out this migration, we adopted the _Think-Do-Check_ mindset; in other words, we followed the concept of _Dry-Run_ to build a repeatable and predictable migration strategy.
 
 This strategy involved the following points:
 
-. make sure source and target clusters are monitored and all metrics needed to track mirroring progress are displayed on easy to access dashboards;
-** Prometheus and Grafana was used in this case;
-** we used the *Strimzi Kafka Exporter* dashboard to gauge consumer group lags, Offsets, Incoming and Outgoing Messages per second.
-** we also used message count per topic to make a guesstimates on topic/partition size;
-. Validate target cluster TTL configs
-* Validate data retention periods match for source and target clusters
-** `log.retention.hours` for time based TTL, 
-** `log.retention.bytes` for byte size based retention
-** this is important because it helps with making sure data has the same TTL across the two clusters.
-. Validate all `KafkaTopic` resources have been created on target cluster with similar configs as the source cluster
-. confirm all required `KafkaUser` resources with their respective RBAC privileges are created
-* in this context, we had one `KafkaUser` resource per app
-. deploy all apps on the target cluster and validate they spin up and down with no issues;
-* once apps are healthy, shut them down until ready for migration;
-* this action created all required consumer groups; additionally it allowed the apps to have _CURRENT_OFFSET_ of zero, which ultimately means the next time an app spins up, it will start reading at that *offset* rather than the latest *offset*; hence preventing apps from skipping messages when they are launched during cut over.
-. deploy MirrorMaker2 on target cluster and begin the replication
-* depending on data size, data ingestion rate, replication speed, it might take from minutes, days, to weeks before MM2 is caught up with source cluster.
+. Make sure _source_ and _target_ clusters are monitored, and all key performance indicators(KPI) needed to track mirroring progress are displayed on easy to access dashboards,
+** Prometheus and Grafana were used in this case,
+** *Strimzi Kafka Exporter* dashboard was to gauge *Consumer Group Lag*, *Consumer Group Offsets*, *Incoming Messages/Seconds*, *Outgoing Messages/Seconds*,
+** *Messages Count/Topic* to make rough estimates about topic/partition size.
+
+. Validate _target cluster_ data retention(TTL) configurations,
+* Validate data retention periods match for _source_ and target clusters,
+** `spec.kafka.config.log.retention.hours` for time based TTL, 
+** `spec.kafak.config.log.retention.bytes` for byte size based retention,
+** having these two configurations match ensure messages have the same TTL across the two clusters.
+
+. Validate all `KafkaTopic` resources have been created on _target cluster_ with parallel configs as those on _source cluster_ .
+
+. Confirm all required `KafkaUser` resources with their respective RBAC privileges are created,
+** for this case, we had one `KafkaUser` resource per application.
+
+. Deploy all applications on the _target cluster_ and validate they spin up and down with no prohibitive errors,
+* once all required producers and consumers are healthy, shut them down until ready for migration,
+** above action created all required consumer groups;
+** it set created *Consumer Group _CURRENT_OFFSET_* to zero which means the next time a producer or consumer spins up, it will start reading or writing at that *CURRENT OFFSET* of zero rather than the latest *offset*; 
+** hence preventing apps from skipping messages when they are launched during Cut Over.
+
+. Deploy MirrorMaker2 on _target cluster_  and begin the replication,
+* depending on data size, data ingestion rate, replication speed, it might take from minutes, days, to weeks before MirrorMaker2 is caught up with the _source cluster_ .
 ** use the monitoring dashboards(source and target), kcat, and *kafka cli programs* for validation.
 
 ## Cut Over Plan
 
-The cut over plan describes steps involved in switching over to the new cluster.
+The plan describes steps involved in switching from the _source cluster_ over to the _target cluster_.
 
-IMPORTANT: MirrorMaker2 must be running ahead of cut over time, this can be days or weeks. use data size, data ingestion rate and replication speed to estimate for how long you need MM2 running.
+### Prerequisites 
+
+MirrorMaker2 must be running ahead of cut over time, this can be hours, days, weeks. Utilize data size, data ingestion rate and replication speed to estimate for how long you need MirrorMaker2 running.
+
+### Procedure
 
 . Stop MM2 instance
-* this action is performed after confirming target cluster has caught up with source cluster.
+* this action is performed after confirming _target cluster_ has caught up with _source cluster_ .
 * use monitoring, kcat, kafka cli tools to help with this.
-** *hint:* grab last n(100, 5000,...) messages from each cluster, encode each message to base64, write the output to files and diff the files.
-** in our case we could not compare offsets because for source and target cluster, offsets were always different regardless of mirroring progress.
-*** I hope this gets resolved in a near future.
-. Turn off data ingestion into legacy cluster and point it to target cluster.
-* this may be `KafkaConnect`, `Debezium for Change Data Capture`, or apps that pull data from some place and pump it into the kafka cluster.
-. Spin down producer apps and wait for consumer apps to drain their respective topics.
-** `producer apps` might behave as both producers and consumers, you need to be very diligent in this case;
-** I would also recommend that you partition your applications into tiers of upstream, dam, and downstream based on data flow and dependency chain.
-. once all topics are drained, spin down consumer apps.
-* a topic is *drained* when consumer group _CURRENT-OFFSET_(read position) matches _LOG-END-OFFSET_(write position) or when _LAG_ is zero.
-* this ensures all messages on source cluster have been processed.
-. Turn on producers/upstream apps on the target cluster
-. Spin up dam apps if any
-. Spin up downstream apps.
-. Validate cut over process is successful
-* Look at data ingestion volume; should be nearly or exactly the same;
-* If your apps are writing to data stores, validate you're getting similar ingestion or read traffic patterns.
-* Validate apps logs and that there are no errors or at least abnormal messages appearing in the logs.
-* Watch for resource consumption spikes and network traffic patterns in the cluster.
+** *hint:* using kcat program, grab last n(100, 5000,...) messages from each cluster, encode each message to base64, write the output to files, execute the diff command on the files,
+*** in our case we could not compare offsets because for _source_ and _target_ cluster, *Consumer Group Offsets* were always different regardless of mirroring progress,
+**** I hope this gets resolved in a near future.
+
+. Turn off data ingestion valve to _source cluster_ and route it to _target cluster_,
+* this may be `KafkaConnect`, `Debezium for Change Data Capture`, or some other system that pumps data into the _AMQ Streams_ cluster.
+
+. Spin down producers and wait for consumers to drain their respective topics,
+** a consumer topic is called drain when _CURRENT OFFSET_(read position) and _LOG-END OFFSET_(write position) matches for the associated *Consumer Group*;
+** when *Consumer Group Lag* is zero, a topic can also be designated drained.
+** in some cases applications behave as both producers and consumers, you need to be very diligent in this case;
+** I would also recommend that you partition your applications into tiers of *Upstream*, *Dam*, and *Downstream* based on data flow and dependency chain.
+
+. Once all topics are drained, spin down consumer apps,
+* this ensures all messages on _source cluster_  have been processed.
+
+. Spin down *Dam* applications if any
+** doing this creates a choke points in the data pipeline; it gives you the ability to dial up/down data flow to *Downstream* applications.
+** it also provide us the ability to sample and verify data coming in before it reaches *Downstream*. 
+
+. Turn on producers on the target cluster,
+* this may be applications on the left side of the *Dam*.
+
+. Spin up *Dam* applications if any
+** being the choke point of the data pipeline, spinning up these apps will open up the floodgate. 
+
+. Spin up *Downstream* applications.
+
+. Validate Cut Over process is successful,
+* look at data ingestion volume; should be nearly or exactly the same as the it was on the _source cluster_;
+* ff your apps are writing to data stores, validate there is similar read/write rate or traffic patterns.
+* validate apps logs and that there are no errors or abnormal messages appearing in the logs.
+* watch for resource consumption spikes and network traffic patterns in the cluster.
+* and last but not least, verify applications are still able to handle your business transactions.
 
 ## Rollback Plan
 
 This plan might be per use case basis, but the distilled form is as follow:
 
-. Switch data ingestion valve to source cluster
-. On source cluster
-* spin down producer/upstream apps
-* let consumer apps drain their respective topics and shut them down.
-. On target cluster
-* turn on producer/upstream apps
-* turn on consumer apps.
-. Validate data ingestion traffic patterns matches original state of source cluster.
+. Switch cluster data ingestion system to _source cluster_.
+
+. On _source cluster_:
+* spin down producers;
+* wait for consumer apps to drain their topics and shut them down.
+
+. On _target cluster_:
+* turn on producer/upstream apps,
+* turn on consumers.
+
+. Validate data ingestion traffic patterns match that of _source cluster_ ,
 * you may use the monitoring dashboards for this; for instance you may look at:
 ** incoming and outgoing messages per second
 ** data ingestion rate in the data stores if any
 ** application health
-** consumer groups and their lags
+** Consumer Group CURRENT OFFSET, LOG-END OFFSET, LAG
 ** bytes in/out per second, and much more.
 
 ## Issues faced and how we solved them
@@ -101,27 +140,26 @@ In simple terms when mirroring an existing cluster:
 
 * set `mirrors.sourceConnector.config.auto.offset.reset: latest`
 ** when replicating historical data is not of concerns
-*** an example use case might be when MM2 is set up at the same time as the AMQ Streams cluster
+*** an example use case might be when MM2 is set up at the same time as the _AMQ Streams_ cluster
 *** or for some requirement, you just want to begin mirroring at the end of topic; no concerns for data loss.
 
 * set `mirrors[].sourceConnector.config.auto.offset.reset: earliest`
 ** when replicating historical data is a requirement
-** when you want all available historical data in the source cluster copied over to the target cluster
-** an example use case might be when migrating an existing AMQ Streams cluster to another with _minimal or zero data loss_.
-** or you want to setup and _active/passive_ setup whereby the passive cluster is installed at a moment when the active cluster have already seen data ingested.
+** when you want all available historical data in the _source cluster_  copied over to the _target cluster_,
+** an example use case might be when migrating an existing _AMQ Streams_ cluster to another with minimal or zero data loss.
+** or you want an _active/passive_ setup whereby the passive cluster is installed at a moment when the active cluster already hold data.
 
-* https://kafka.apache.org/documentation/#consumerconfigs_auto.offset.reset[Red the Kafka docs for more]
+* https://kafka.apache.org/documentation/#consumerconfigs_auto.offset.reset[Fore more on SourceConnector configs, read here.]
 
-### Pods killed due to Out Of Memory in new cluster
+### Pods killed due to Out Of Memory error in new cluster
 
-Pods were being terminated in the target cluster, at first we thought it was the JVM eating up all the pod memory. We implemented JVM boundaries whereby we _-Xms_ and _Xmx_ values as arguments for the _ENTRYPOINT_ command of the container image; `java -jar` in this case. Despite this change we still got OOMKilled errors, pods were being killed.
+Pods were being terminated in the target cluster, at first we thought it was the JVM eating up all the pod memory. We implemented JVM boundaries withe _-Xms_ and _Xmx_ values as arguments for the _ENTRYPOINT_ command of the container image; `java -jar` in this case. Despite this change we still got OOMKilled errors, pods were being terminated.
 
-* https://docs.openshift.com/container-platform/4.8/nodes/clusters/nodes-cluster-resource-configure.html[Click here for more on cluster memory configuration]
+After few days of troubleshooting and head scratches, we found the root cause. The issue was due to some of the apps creating more processes in their containers than the `PID limit` set at *1024* by default; hence _OOMKilled_ error after the pod runs for few hours despite having an HorizontalPodAutoscaler resource monitoring this particular application for autoscaling scaling needs.
 
-The next level of our troubleshooting, which by the way caused some head scratches for few days, is to increase the PID limit of the nodes in the RHOCP cluster. This issue was due to some of the apps creating more processes in their respective containers than the default PID limit set at *1024*; hence _OOMKilled_ error after the pod runs for few hours despite having an _HorizontalPodAutoscaler_ resource monitoring this particular application for scaling needs.
-
-* https://kubernetes.io/docs/concepts/policy/pid-limiting/[Read on Kubernetes docs about PIDs limit]
-* https://computingforgeeks.com/change-pids-limit-value-in-openshift/[Click here for how to change PIDs limit in Openshift]
+* https://docs.OpenShift.com/container-platform/4.8/nodes/clusters/nodes-cluster-resource-configure.html[Click here for more on cluster memory configuration]
+* https://kubernetes.io/docs/concepts/policy/pid-limiting/[Read on Kubernetes docs about PID limit]
+* https://computingforgeeks.com/change-pids-limit-value-in-OpenShift/[Click here for how to change PID limit in OpenShift]
 
 
 ## Technical Implementation
@@ -134,9 +172,26 @@ include::AMQ-Streams-command-cheat-sheet.pdf[]
 
 ## Summary
 
-In this article we have explained the strategies and plans involved in migration of an AMQ Streams cluster in an _Active/Passive_ setting between two RHOCP installations.
+In this guide, we have explained the strategies and plans involved in the migration of an _AMQ Streams_ cluster in an _Active/Passive_ setting between two OpenShift installations. Have a look at the *Technical Implementations* section for a walk through demo.
 
 Happy Streaming!
+
+
+## Glossary:
+
+* Apache Kafka: Software product for building large scale messaging networks.
+* AMQ Streams: RedHat product for simplifying Apache Kafka deployment in an OpenShift Cluster.
+* Source Cluster: AMQ Streams v1.4
+* Target Cluster: AMQ Streams v1.7
+* Producer: Any application that publishes to AMQ Streams.
+* Consumer: Any application that consumes messages or subscribes to topics.
+* Consumer Group: a collection of consumers who collaborate to consume data from topics.
+* Consumer Group Current Offset: Read position of the consumer subscribed to a topic via a Consumer Group.
+* Consumer Group Log End Offset: Write position of the producer subscribed to a topic via a Consumer Group.
+* Consumer Group Lag: indicates the lag(diff between LOD-END OFFSET and CURRENT-OFFSET) between a producers and consumers subscribing to the same topic via a consumer group.
+* Drained Topic:  a topic is drained when the associated consumer group lag is zero.
+* Topic: it has unique name across the Kafka cluster; it help with message categorization.
+* Partition: breaks topics into multiple logs each of which can live on a different node; messages are written at the partition level; moreover, partitions provide means of concurrency for the Kafka cluster.
 
 
 
