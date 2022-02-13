@@ -3,6 +3,10 @@
 [quote, _AMQ Streams_ Product docs]
 _AMQ Streams_ simplifies the process of running Apache Kafka in an OpenShift cluster.
 
+*Note*: 
+
+All references of _source cluster_, _target cluster_ implicitly mean *AMQ Streams v1.4*, *AMQ Streams v1.7* respectively; unless when otherwise explicitly pointed out. I have made an attempt to define certain commonly utilized terms in the *Glossary* section.
+
 ## Abstract
 
 This guide attempts to discuss lessons learned from a migration project for a large freight company. We helped migrate an _AMQ Streams_ cluster from OpenShift 3.11 to 4.7; additionally, we also migrated over 100s Java event-driven micro-services to the new cluster(AMQ Streams V1.7).
@@ -13,8 +17,6 @@ We will begin with an overview of the two clusters(kafka-source and kafka-target
 
 
 ## Migration Goals
-
-*Note*: All references of _source cluster_, _target cluster_ implicitly mean *AMQ Streams v1.4*, *AMQ Streams v1.7* respectively; unless when otherwise explicitly pointed out.
 
 
 In condensed terms, there was a need to migrate a pre-existing _AMQ Streams_(v1.4) cluster from OpenShift(v3.11) to _AMQ Streams_(v1.7) on OpenShift(v4.7).
@@ -33,35 +35,35 @@ To successfully carry out this migration, we adopted the _Think-Do-Check_ mindse
 
 This strategy involved the following points:
 
-. Make sure _source_ and target clusters are monitored and all key performance indicators(KPI) needed to track mirroring progress are displayed on easy to access dashboards,
+. Make sure _source_ and _target_ clusters are monitored, and all key performance indicators(KPI) needed to track mirroring progress are displayed on easy to access dashboards,
 ** Prometheus and Grafana were used in this case,
 ** *Strimzi Kafka Exporter* dashboard was to gauge *Consumer Group Lag*, *Consumer Group Offsets*, *Incoming Messages/Seconds*, *Outgoing Messages/Seconds*,
 ** *Messages Count/Topic* to make rough estimates about topic/partition size.
 
-. Validate _target cluster(AMQ Streams v1.7)_ data retention(TTL) configurations,
+. Validate _target cluster_ data retention(TTL) configurations,
 * Validate data retention periods match for _source_ and target clusters,
 ** `spec.kafka.config.log.retention.hours` for time based TTL, 
 ** `spec.kafak.config.log.retention.bytes` for byte size based retention,
 ** having these two configurations match ensure messages have the same TTL across the two clusters.
 
-. Validate all `KafkaTopic` resources have been created on _target cluster(AMQ Streams v1.7)_ with parallel configs as those on _source cluster(AMQ Streams v1.4)_ .
+. Validate all `KafkaTopic` resources have been created on _target cluster_ with parallel configs as those on _source cluster_ .
 
 . Confirm all required `KafkaUser` resources with their respective RBAC privileges are created,
 ** for this case, we had one `KafkaUser` resource per application.
 
-. Deploy all applications on the _target cluster(AMQ Streams v1.7)_ and validate they spin up and down with no prohibitive errors,
+. Deploy all applications on the _target cluster_ and validate they spin up and down with no prohibitive errors,
 * once all required producers and consumers are healthy, shut them down until ready for migration,
 ** above action created all required consumer groups;
 ** it set created *Consumer Group _CURRENT_OFFSET_* to zero which means the next time a producer or consumer spins up, it will start reading or writing at that *CURRENT OFFSET* of zero rather than the latest *offset*; 
 ** hence preventing apps from skipping messages when they are launched during Cut Over.
 
-. Deploy MirrorMaker2 on _target cluster(AMQ Streams v1.7)_  and begin the replication,
-* depending on data size, data ingestion rate, replication speed, it might take from minutes, days, to weeks before MirrorMaker2 is caught up with the _source cluster(AMQ Streams v1.4)_ .
+. Deploy MirrorMaker2 on _target cluster_  and begin the replication,
+* depending on data size, data ingestion rate, replication speed, it might take from minutes, days, to weeks before MirrorMaker2 is caught up with the _source cluster_ .
 ** use the monitoring dashboards(source and target), kcat, and *kafka cli programs* for validation.
 
 ## Cut Over Plan
 
-The plan describes steps involved in switching from the _source cluster(AMQ Streams v1.4)_ over to the _target cluster(AMQ Streams V1.7)_.
+The plan describes steps involved in switching from the _source cluster_ over to the _target cluster_.
 
 ### Prerequisites 
 
@@ -70,7 +72,7 @@ MirrorMaker2 must be running ahead of cut over time, this can be hours, days, we
 ### Procedure
 
 . Stop MM2 instance
-* this action is performed after confirming _target cluster(AMQ Streams v1.7)_ has caught up with _source cluster(AMQ Streams v1.4)_ .
+* this action is performed after confirming _target cluster_ has caught up with _source cluster_ .
 * use monitoring, kcat, kafka cli tools to help with this.
 ** *hint:* using kcat program, grab last n(100, 5000,...) messages from each cluster, encode each message to base64, write the output to files, execute the diff command on the files,
 *** in our case we could not compare offsets because for _source_ and _target_ cluster, *Consumer Group Offsets* were always different regardless of mirroring progress,
@@ -86,7 +88,7 @@ MirrorMaker2 must be running ahead of cut over time, this can be hours, days, we
 ** I would also recommend that you partition your applications into tiers of *Upstream*, *Dam*, and *Downstream* based on data flow and dependency chain.
 
 . Once all topics are drained, spin down consumer apps,
-* this ensures all messages on _source cluster(AMQ Streams v1.4)_  have been processed.
+* this ensures all messages on _source cluster_  have been processed.
 
 . Spin down *Dam* applications if any
 ** doing this creates a choke points in the data pipeline; it gives you the ability to dial up/down data flow to *Downstream* applications.
@@ -169,9 +171,26 @@ include::AMQ-Streams-command-cheat-sheet.pdf[]
 
 ## Summary
 
-In this guide, we have explained the strategies and plans involved in the migration of an _AMQ Streams_ cluster in an _Active/Passive_ setting between two OpenShift installations.
+In this guide, we have explained the strategies and plans involved in the migration of an _AMQ Streams_ cluster in an _Active/Passive_ setting between two OpenShift installations. Have a look at the *Technical Implementations* section for a walk through demo.
 
 Happy Streaming!
+
+
+## Glossary:
+
+* Apache Kafka: Software product for building large scale messaging networks.
+* AMQ Streams: RedHat product for simplifying Apache Kafka deployment in an OpenShift Cluster.
+* Source Cluster: AMQ Streams v1.4
+* Target Cluster: AMQ Streams v1.7
+* Producer: Any application that publishes to AMQ Streams.
+* Consumer: Any application that consumes messages or subscribes to topics.
+* Consumer Group: a collection of consumers who collaborate to consume data from topics.
+* Consumer Group Current Offset: Read position of the consumer subscribed to a topic via a Consumer Group.
+* Consumer Group Log End Offset: Write position of the producer subscribed to a topic via a Consumer Group.
+* Consumer Group Lag: indicates the lag(diff between LOD-END OFFSET and CURRENT-OFFSET) between a producers and consumers subscribing to the same topic via a consumer group.
+* Drained Topic:  a topic is drained when the associated consumer group lag is zero.
+* Topic: it has unique name across the Kafka cluster; it help with message categorization.
+* Partition: breaks topics into multiple logs each of which can live on a different node; messages are written at the partition level; moreover, partitions provide means of concurrency for the Kafka cluster.
 
 
 
