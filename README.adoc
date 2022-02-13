@@ -3,6 +3,7 @@
 [quote, _AMQ Streams_ Product docs]
 _AMQ Streams_ simplifies the process of running Apache Kafka in an OpenShift cluster.
 
+
 *Note*: 
 
 All references of _source cluster_, _target cluster_ implicitly mean *AMQ Streams v1.4*, *AMQ Streams v1.7* respectively; unless when otherwise explicitly pointed out. I have made an attempt to define certain commonly utilized terms in the *Glossary* section.
