@@ -123,7 +123,7 @@ A side note, this procedure is not set in stone; you may need to tweak the execu
 
 . Validate Cut Over process is successful,
 * look at data ingestion volume; should be nearly or exactly the same as the it was on the _source cluster_;
-* ff your apps are writing to data stores, validate there is similar read/write rate or traffic patterns.
+* if your apps are writing to data stores, validate there is similar read/write rate or traffic patterns.
 * validate apps logs and that there are no errors or abnormal messages appearing in the logs.
 * watch for resource consumption spikes and network traffic patterns in the cluster.
 * and last but not least, verify applications are still able to handle your business transactions.
@@ -172,7 +172,7 @@ In simple terms when mirroring an existing cluster:
 
 ### Pods killed due to Out Of Memory error in new cluster
 
-Pods were being terminated in the target cluster, at first we thought it was the JVM eating up all the pod memory. We implemented JVM boundaries withe _-Xms_ and _Xmx_ values as arguments for the _ENTRYPOINT_ command of the container image; `java -jar` in this case. Despite this change we still got OOMKilled errors, pods were being terminated.
+Pods were being terminated in the target cluster, at first we thought it was the JVM eating up all the pod memory. We implemented JVM boundaries with _-Xms_ and _Xmx_ values as arguments for the _ENTRYPOINT_ command of the container image; `java -jar` in this case. Despite this change we still got OOMKilled errors, pods were being terminated.
 
 After few days of troubleshooting and head scratches, we found the root cause. The issue was due to some of the apps creating more processes in their containers than the `PID limit` set at *1024* by default; hence _OOMKilled_ error after the pod runs for few hours despite having an HorizontalPodAutoscaler resource monitoring this particular application for autoscaling scaling needs.
 
