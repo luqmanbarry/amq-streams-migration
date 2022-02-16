@@ -42,6 +42,16 @@ To successfully carry out this migration, we adopted the _Think-Do-Check_ mindse
 This strategy involved the following points:
 
 . Make sure _source_ and _target_ clusters are monitored, and all key performance indicators(KPI) needed to track mirroring progress are displayed on easy to access dashboards,
+** Some of these metrics are: 
+*** Consumer Group CURRENT OFFSET,
+*** Consumer Group LOG-END OFFSET,
+*** Consumer Group Lag, 
+*** Bytes In & Out Per Seconds,
+*** Incoming & Outgoing Messages Per Seconds
+*** Total Messages per Topic/Partition
+*** Total Bytes per Partition
+*** Balancedness Score
+*** Max Bytes Size vs. Used Bytes of PersistenceVolume objects backing up the AMQ Streams cluster
 ** Prometheus and Grafana were used in this case,
 ** *Strimzi Kafka Exporter* dashboard was to gauge *Consumer Group Lag*, *Consumer Group Offsets*, *Incoming Messages/Seconds*, *Outgoing Messages/Seconds*,
 ** *Messages Count/Topic* to make rough estimates about topic/partition size.
@@ -49,7 +59,7 @@ This strategy involved the following points:
 . Validate _target cluster_ data retention(TTL) configurations,
 * Validate data retention periods match for _source_ and target clusters,
 ** `spec.kafka.config.log.retention.hours` for time based TTL, 
-** `spec.kafak.config.log.retention.bytes` for byte size based retention,
+** `spec.kafka.config.log.retention.bytes` for byte size based retention,
 ** having these two configurations match ensure messages have the same TTL across the two clusters.
 
 . Validate all `KafkaTopic` resources have been created on _target cluster_ with parallel configs as those on _source cluster_ .
@@ -75,38 +85,41 @@ The plan describes steps involved in switching from the _source cluster_ over to
 
 MirrorMaker2 must be running ahead of cut over time, this can be hours, days, weeks. Utilize data size, data ingestion rate and replication speed to estimate for how long you need MirrorMaker2 running.
 
-### Procedure
+A side note, this procedure is not set in stone; you may need to tweak the execution plan to match your requirements and scenarios.
 
-. Stop MM2 instance
-* this action is performed after confirming _target cluster_ has caught up with _source cluster_ .
-* use monitoring, kcat, kafka cli tools to help with this.
-** *hint:* using kcat program, grab last n(100, 5000,...) messages from each cluster, encode each message to base64, write the output to files, execute the diff command on the files,
-*** in our case we could not compare offsets because for _source_ and _target_ cluster, *Consumer Group Offsets* were always different regardless of mirroring progress,
-**** I hope this gets resolved in a near future.
+### Procedure
 
 . Turn off data ingestion valve to _source cluster_ and route it to _target cluster_,
 * this may be `KafkaConnect`, `Debezium for Change Data Capture`, or some other system that pumps data into the _AMQ Streams_ cluster.
 
-. Spin down producers and wait for consumers to drain their respective topics,
+. Spin down producers on _source cluster_ and wait for consumers to drain their respective topics,
 ** a consumer topic is called drain when _CURRENT OFFSET_(read position) and _LOG-END OFFSET_(write position) matches for the associated *Consumer Group*;
 ** when *Consumer Group Lag* is zero, a topic can also be designated drained.
 ** in some cases applications behave as both producers and consumers, you need to be very diligent in this case;
 ** I would also recommend that you partition your applications into tiers of *Upstream*, *Dam*, and *Downstream* based on data flow and dependency chain.
+** Another approach could be breaking the applications into buckets(you decide the criteria), and migrate one batch at a time.
 
-. Once all topics are drained, spin down consumer apps,
+. Once all topics are drained, spin down consumer apps on _source cluster_,
 * this ensures all messages on _source cluster_  have been processed.
 
-. Spin down *Dam* applications if any
+. On _target cluster_, spin down *Dam* applications if any
 ** doing this creates a choke points in the data pipeline; it gives you the ability to dial up/down data flow to *Downstream* applications.
 ** it also provide us the ability to sample and verify data coming in before it reaches *Downstream*. 
 
 . Turn on producers on the target cluster,
 * this may be applications on the left side of the *Dam*.
 
-. Spin up *Dam* applications if any
+. On _target cluster_, spin up *Dam* applications if any
 ** being the choke point of the data pipeline, spinning up these apps will open up the floodgate. 
 
-. Spin up *Downstream* applications.
+. Spin up *Downstream* applications on _target cluster_.
+
+. Stop MirrorMaker2 instance
+* this action is performed after confirming _target cluster_ has caught up with _source cluster_ .
+* use monitoring, kcat, kafka cli tools to help with this.
+** *hint:* using kcat program, grab last n(100, 5000,...) messages from each cluster, encode each message to base64, write the output to files, execute the diff command on the files,
+*** in our case we could not compare offsets because for _source_ and _target_ cluster, *Consumer Group Offsets* were always different regardless of mirroring progress,
+**** I hope this gets resolved in a near future.
 
 . Validate Cut Over process is successful,
 * look at data ingestion volume; should be nearly or exactly the same as the it was on the _source cluster_;
@@ -144,6 +157,7 @@ This plan might be per use case basis, but the distilled form is as follow:
 In simple terms when mirroring an existing cluster:
 
 * set `mirrors.sourceConnector.config.auto.offset.reset: latest`
+** If using this approach, you could just point your producers to the _source cluster_; however in our case the client wanted to have an new installation of _AMQ Streams_(v1.4 to v1.7) on a brand new OpenShift Container Platform(v3.11 to v4.7)
 ** when replicating historical data is not of concerns
 *** an example use case might be when MM2 is set up at the same time as the _AMQ Streams_ cluster
 *** or for some requirement, you just want to begin mirroring at the end of topic; no concerns for data loss.
