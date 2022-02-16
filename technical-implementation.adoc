@@ -6,7 +6,7 @@ We will begin with an overview of the two clusters(kafka-source and kafka-target
 
 ## Environment Overview
 
-This guide uses two namespaces within the same Openshift cluster to mimic cross OCP deployments migration. The approach would be roughly the same if for instance we were looking to migrate a Strimzi cluster from OCP3 to OCP4. An obvious change would be using external routes when referencing source brokers; rather than services in our case.
+This guide uses two namespaces within the same OpenShift cluster to mimic cross OCP deployments migration. The approach would be roughly the same if for instance we were looking to migrate a Strimzi cluster from OCP3 to OCP4. An obvious change would be using external routes when referencing source brokers; rather than services in our case.
 
 ### Architecture
 
@@ -21,7 +21,7 @@ We will be deploying AMQ Streams v1.8 for this guide.
 * Cluster operator to manage the Kafka cluster
 ** watches over the strimzi cluster components for change reconciliation
 * Kafka (including ZooKeeper, Entity Operator, Kafka Exporter, and Cruise Control)
-** https://access.redhat.com/documentation/en-us/red_hat_amq/2021.q3/html-single/using_amq_streams_on_openshift/index#type-KafkaSpec-reference[Follow this link for more]
+** https://access.redhat.com/documentation/en-us/red_hat_amq/2021.q3/html-single/using_amq_streams_on_OpenShift/index#type-KafkaSpec-reference[Follow this link for more]
 * KafkaMirrorMaker2
 ** handles cluster mirroring activities;
 ** deployed on the target cluster
@@ -34,7 +34,7 @@ We will be deploying AMQ Streams v1.8 for this guide.
 
 ## Implementation
 
-This guide will utilize a 2 nodes Openshift 4.8 cluster.
+This guide will utilize a 2 nodes OpenShift 4.8 cluster.
 
 IMPORTANT: 
 
@@ -81,7 +81,7 @@ oc project ${WORK_NAMESPACE}
 
 [source,bash]
 ----
-oc -n openshift-user-workload-monitoring get pods
+oc -n OpenShift-user-workload-monitoring get pods
 ----
 
 ** If enabled, the output should look like below table
@@ -101,11 +101,11 @@ thanos-ruler-user-workload-0         3/3     Running   0          55s
 # Install the user-workload-monitoring sub-chart
 helm upgrade --install user-workload-monitoring amq-streams-chart/charts/user-workload-monitoring --namespace ${WORK_NAMESPACE}
 # list monitoring pods
-oc -n openshift-user-workload-monitoring get pod
+oc -n OpenShift-user-workload-monitoring get pod
 ----
 +
 ** Output should look like above table.
-* https://docs.openshift.com/container-platform/4.8/monitoring/enabling-monitoring-for-user-defined-projects.html[Click here for more on user-workload monitoring].
+* https://docs.OpenShift.com/container-platform/4.8/monitoring/enabling-monitoring-for-user-defined-projects.html[Click here for more on user-workload monitoring].
 
 *Progress Check:*
 
